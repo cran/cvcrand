@@ -1,57 +1,122 @@
-#' Constrained randomization for cluster randomized trials
-#' @param id a vector specifying cluster name
-#' @param x a data frame specifying the cluster-level covariates to balance
-#' @param categorical a vector specifying categorical (including binary) variables. This can be names of the columns or number indexes of columns. Suppose there are \code{K} categories for a categorical variable, \code{cvcrand} function creates \code{K-1} dummy variables and drops the first level based on the alphanumeric order. If the user wants to specify different level to drop for a categorical variable, the user can create \code{K-1} dummy variables as wished to use before running \code{cvcrand}
-#' @param weight a vector of user-specified weights for the covariates
-#' @param n the total number of clusters. It must be a positive integer
-#' @param ntrt the number of clusters in the treatment arm; must be a positive integer less than \code{n}
-#' @param cutoff cutoff of distribution of balance scores below which a randomization scheme is sampled. Its default is 0.1, and must be between 0 and 1.
-#' @param numschemes number of schemes to sample. If specified, it overrides cutoff and it must be a positive integer.
-#' @param size number of simulated schemes when simulation is invoked. Its default is 50,000, and must be a positive integer.
-#' @param seed randomization seed. Its default is 12345
-#' @param metric balance metric to use. Its choices are "L1" and "L2". The default is "L2"
-#' @param nosim If TRUE, it makes the program enumerate all randomization schemes, regardless of number
-#' @param savedata the path of the csv file of the constrained randomization space if specified. The first column of the csv data is an indicator variable of the selected randomization scheme. The csv file is needed for clustered permutation test analysis
-#' @param savebscores the path of the csv file of the vector of balance scores across the entire randomization space if specified. When this option is specified, a histogram is also produced which displays the distribution of all balance scores with a red line on the graph indicating the selected cutoff
+#' Covariate-constrained randomization for cluster randomized trials
+#' @param clustername a vector specifying the identification variable of the cluster. If no cluster identification variable is specified, the default is to label the clusters based on the order in which they appear.
+#' @param x a data frame specifying the values of cluster-level covariates to balance. With K covariates and n clusters, it will be dimension of \code{n} by \code{K}.
+#' @param categorical a vector specifying categorical (including binary) variables. This can be names of the columns or number indexes of columns, but cannot be both. Suppose there are \code{p} categories for a categorical variable, \code{cvcrand} function creates \code{p-1} dummy variables and drops the reference level if the variable is specified as a factor. Otherwise, the first level in the alphanumerical order will be dropped. The results are sensitive to which level is excluded. If the user wants to specify a different level to drop for a \code{p}-level categorical variable, the user can create \code{p-1} dummy variables and these can instead be supplied as covariates to the \code{cvcrand} function. Then, the user needs to specify the dummy variables created to be \code{categorical} when running \code{cvcrand}. In addition, the user could also set the variable as a factor with the specific reference level. If the \code{weights} option is used, the weights for a categorical variable will be replicated on all the dummy variables created.
+#' @param weights a vector of user-specified weights for the covariates to calculate the balance score. The weight for a categorical variable will be replicated for the dummy variables created. Note that the \code{weights} option can be used to conduct stratification on variables. For example, a variable with a relatively large weight like \code{1000} and all other variables with a weight of \code{1} will cause the randomization scheme chosen to be stratified by the variable with the large weight, assuming a low \code{cutoff} value is specified.
+#' @param ntotal_cluster the total number of clusters to be randomized. It must be a positive integer and equal to the number of rows of the data.
+#' @param ntrt_cluster  the number of clusters that the researcher wants to assign to the treatment arm. It must be a positive integer less than the total number of clusters.
+#' @param cutoff quantile cutoff of the distribution of balance score below which a randomization scheme is sampled. Its default is \code{0.1}, and it must be between 0 and 1. The \code{cutoff} option is overriden by the \code{numschemes} option.
+#' @param numschemes number of randomization schemes to form the constrained space for the final randomization scheme to be selected. If specified, it overrides the option \code{cutoff} and the program will randomly sample the final randomization scheme from the constrained space of randomization schemes with the \code{numschemes} smallest balance scores. It must be a positive integer.
+#' @param size number of randomization schemes to simulate if the number of all possible randomization schemes is over \code{size}. Its default is \code{50,000}, and must be a positive integer. It can be overriden by the \code{nosim} option.
+#' @param stratify categorical variables on which to stratify the randomization. It overrides the option \code{weights} when specified. This list of categorical variables should be a subset of the \code{categorical} option if specified.
+#' @param seed seed for simulation and random sampling. It is needed so that the randomization can be replicated. Its default is \code{12345}.
+#' @param balancemetric balance metric to use. Its choices are \code{"l1"} and \code{"l2"}. The default is \code{"l2"}.
+#' @param nosim if TRUE, it overrides the default procedure of simulating when the number of all possible randomization schemes is over the \code{size}, and the program enumerates all randomization schemes. Note: this may consume a lot of memory and cause R to crash
+#' @param savedata saves the data set of the constrained randomization space in a csv file if specified by string. The first column of the csv file is an indicator variable of the final randomization scheme in the constrained space. The constrained randomization space will be needed for analysis after the cluster randomized trial is completed if the clustered permutation test is used.
+#' @param savebscores saves the vector of all balance scores across the entire randomization space in a csv file if specified by string. When this option is specified, a histogram is also produced which displays the distribution of all balance scores with a red line on the graph indicating the selected cutoff.
 #' @keywords cluster randomized trails, constrained randomization
 #' @author Hengshi Yu <hengshi@umich.edu>, John A. Gallis <john.gallis@duke.edu>, Fan Li <frank.li@duke.edu>, Elizabeth L. Turner <liz.turner@duke.edu>
 #' @description cvcrand performs constrained randomization for cluster randomized
-#' trials (CRTs), especially with a small number of clusters. In constrained randomization,
-#' a randomized scheme is randomly sampled from a subset of all possible randomization schemes
-#' based on the value of a balancing criterion proposed by Raab and Butcher (2001) called balance score. And \code{cvcrand} function has two choices of "L1" and "L2" metrics for balance score.
+#' trials (CRTs), especially suited for CRTs with a small number of clusters. In constrained randomization,
+#' a randomization scheme is randomly sampled from a subset of all possible randomization schemes
+#' based on the value of a balancing criterion called a balance score. The \code{cvcrand} function has two choices of "l1" and "l2" metrics for balance score.
 #'
-#' \code{cvcrand} function enumerates all randomization schemes or chooses the unique ones among some simulated randomization schemes as specified by the user.
-#' Some cluster-level "continuous" or "categorical" covariates are then used to calculate the balance scores for the focused schemes. A subset of the randomization schemes is chosen based on user-specified cutoff of certain quantile of balance scores or some fixed number of schemes with the smallest balance scores. \code{cvcrand} function
+#' The \code{cvcrand} function enumerates all randomization schemes or chooses the unique ones among some simulated randomization schemes as specified by the user.
+#' Some cluster-level "continuous" or "categorical" covariates are then used to calculate the balance scores for the unique schemes. A subset of the randomization schemes is chosen based on user-specified cutoff of certain quantile of the distribution of the balance scores or based on a fixed number of schemes with the smallest balance scores. The \code{cvcrand} function
 #' treats the subset as the constrained space of randomization schemes and samples one scheme from the constrained space as the final chosen scheme.
 #'
 #' @references
 #' Raab, G.M. and Butcher, I., 2001. Balance in cluster randomized trials. Statistics in medicine, 20(3), pp.351-365.
 #'
 #' Li, F., Lokhnygina, Y., Murray, D.M., Heagerty, P.J. and DeLong, E.R., 2016. An evaluation of constrained randomization for the design and analysis of group randomized trials. Statistics in medicine, 35(10), pp.1565-1579.
+#'
+#' Li, F., Turner, E. L., Heagerty, P. J., Murray, D. M., Vollmer, W. M., & DeLong, E. R. (2017). An evaluation of constrained randomization for the design and analysis of group randomized trials with binary outcomes. Statistics in medicine, 36(24), 3791-3806.
+#'
+#' Gallis, J. A., Li, F., Yu, H., Turner, E. L. (In Press).  cvcrand and cptest: Efficient design and analysis of cluster randomized trials.  Stata Journal.
+#'
+#' Gallis, J. A., Li, Fl. Yu, H., Turner, E. L. (2017).  cvcrand and cptest: Efficient design and analysis of cluster randomized trials.  Stata Conference.  https://www.stata.com/meeting/baltimore17/slides/Baltimore17_Gallis.pdf.
+#'
+#' Dickinson, L. M., Beaty, B., Fox, C., Pace, W., Dickinson, W. P., Emsermann, C., & Kempe, A. (2015). Pragmatic cluster randomized trials using covariate constrained randomization: A method for practice-based research networks (PBRNs). The Journal of the American Board of Family Medicine, 28(5), 663-672.
+#'
 #' @export
 #' @examples
-#' Design_result<-cvcrand(id = Dickinson_design$county,
-#'                metric = "L2",
-#'                x = data.frame(Dickinson_design[, -1]),
-#'                n = 16,
-#'                ntrt = 8,
-#'                categorical = c("location", "incomecat"),
-#'                savedata = "dickinson_constrained.csv",
-#'                savebscores = "dickinson_bscores.csv",
-#'                cutoff = 0.1,
-#'                seed = 12345)
 #'
-#' @return \code{metric} the metric we use
-#' @return \code{Allocation} the allocation scheme from the constrained randomization
-#' @return \code{Bscores} the histogram of the B score with respect to the metric
-#' @return \code{assignment_message} the statement about how many clusters to randomize to the intervention and the control arms respectively
-#' @return \code{scheme_message} the statement about how to get the whole randomization space of schemes
-#' @return \code{BL_cut_message} the statement about the benchmark of the constrained space
-#' @return \code{BLchoice_message} the statement about the selected scheme from constrained randomization
-#' @return \code{data_BL} the data frame containing the allocation scheme, the id as well as the original covariates' matrix or data frame
-#' @return \code{BL_result} the descriptive statistics for all the variables in the original covariates' matrix or data frame in the two arms from the selected scheme
+#' # cvcrand example
+#'
+#' Design_result <- cvcrand(clustername = Dickinson_design$county,
+#'                          balancemetric = "l2",
+#'                          x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+#'                          ntotal_cluster = 16,
+#'                          ntrt_cluster = 8,
+#'                          categorical = c("location", "incomecat"),
+#'                          savedata = "dickinson_constrained.csv",
+#'                          savebscores = "dickinson_bscores.csv",
+#'                          cutoff = 0.1,
+#'                          seed = 12345)
+#'
+#' # cvcrand example with weights specified
+#'
+#' Design_result <- cvcrand(clustername = Dickinson_design$county,
+#'                          balancemetric = "l2",
+#'                          x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+#'                          ntotal_cluster = 16,
+#'                          ntrt_cluster = 8,
+#'                          categorical = c("location", "incomecat"),
+#'                          weights = c(1, 1, 1, 1, 1),
+#'                          cutoff = 0.1,
+#'                          seed = 12345)
+#'
+#' # Stratification on location, with constrained
+#' # randomization on other specified covariates
+#'
+#'  Design_stratified_result <- cvcrand(clustername = Dickinson_design$county,
+#'                                      balancemetric = "l2",
+#'                                      x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+#'                                      ntotal_cluster = 16,
+#'                                      ntrt_cluster = 8,
+#'                                      categorical = c("location", "incomecat"),
+#'                                      weights = c(1000, 1, 1, 1, 1),
+#'                                      cutoff = 0.1,
+#'                                      seed = 12345)
+#'
+#'  # An alternative and equivalent way to stratify on location
+#'
+#'  Design_stratified_result <- cvcrand(clustername = Dickinson_design$county,
+#'                                      balancemetric = "l2",
+#'                                      x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+#'                                      ntotal_cluster = 16,
+#'                                      ntrt_cluster = 8,
+#'                                      categorical = c("location", "incomecat"),
+#'                                      stratify = "location",
+#'                                      cutoff = 0.1,
+#'                                      seed = 12345)
+#'
+#'  # Stratification on income category
+#'  #Two of the income categories contain an odd number of clusters
+#'  # Stratification is not strictly possible
+#'
+#'  Design_stratified_inc_result <- cvcrand(clustername = Dickinson_design$county,
+#'                                          balancemetric = "l2",
+#'                                          x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+#'                                          ntotal_cluster = 16,
+#'                                          ntrt_cluster = 8,
+#'                                          categorical = c("location", "incomecat"),
+#'                                          stratify = "incomecat",
+#'                                          cutoff = 0.1,
+#'                                          seed = 12345)
+#'
+#'
+#' @return \code{balancemetric} the balance metric used
+#' @return \code{allocation} the allocation scheme from constrained randomization
+#' @return \code{bscores} the histogram of the balance score with respect to the balance metric
+#' @return \code{assignment_message} the statement about how many clusters to be randomized to the intervention and the control arms respectively
+#' @return \code{scheme_message} the statement about how to get the whole randomization space to use in constrained randomization
+#' @return \code{cutoff_message} the statement about the cutoff in the constrained space
+#' @return \code{choice_message} the statement about the selected scheme from constrained randomization
+#' @return \code{data_CR} the data frame containing the allocation scheme, the clustername as well as the original data frame of covariates
+#' @return \code{baseline_table} the descriptive statistics for all the variables by the two arms from the selected scheme
 
-cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cutoff = 0.1, numschemes = NULL, size = 50000, seed = NULL, metric = "L2", nosim = FALSE, savedata = NULL, savebscores = NULL){
+cvcrand = function(clustername = NULL, x, categorical = NULL, weights = NULL, ntotal_cluster, ntrt_cluster, cutoff = 0.1, numschemes = NULL, size = 50000, stratify = NULL, seed = NULL, balancemetric = "l2", nosim = FALSE, savedata = NULL, savebscores = NULL){
 
   if (!is.null(seed)) {
       set.seed(seed)
@@ -59,46 +124,75 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
       set.seed(12345)
       } ##default seed to be 12345
 
-  if(is.null(id)){
+  if(is.null(clustername)){
 
-    id <- 1:dim(x)[1]
+    clustername <- 1:dim(x)[1]
 
   }
 
-  nsub <- length(id) # number of clusters
+  nsub <- length(clustername) # number of clusters
 
-  if (n %% 1 != 0) {
-    stop("Error: number of clusters is not an integer!")
+  if (ntotal_cluster %% 1 != 0) {
+    stop("Error: number of clusters specified must be an integer.")
   }
 
-  if (n <= 0) {
-    stop("Error: number of clusters is not a positive number!")
+  if (ntotal_cluster <= 0) {
+    stop("Error: number of clusters specified must be a positive number.")
   }
 
-  if (ntrt %% 1 != 0) {
-    stop("Error: number of treatment clusters is not an integer!")
+  if (ntrt_cluster %% 1 != 0) {
+    stop("Error: number of treatment clusters specified must be an integer.")
   }
 
-  if (ntrt <= 0) {
-    stop("Error: number of treatment clusters is not a positive number!")
+  if (ntrt_cluster <= 0) {
+    stop("Error: number of treatment clusters specified must be a positive number.")
   }
 
    if(nsub != dim(x)[1]) {
-    stop("Error: the id vector and the covariates matrix or data frame do not match in the number of clusters")
+    stop("Error: the clustername vector and the covariates data frame must match in the number of clusters")
   }
 
-  if(nsub != n) {
-    stop("Error: number of clusters is not correctly set!")
+  if(nsub != ntotal_cluster) {
+    stop("Error: number of clusters specified must equal the number of rows in the data set.")
   }
 
-  if (n <= ntrt) {
-    stop("Error: number of clusters in the treatment arm is greater than or equal to the total number of clusters!")
+  if (ntotal_cluster <= ntrt_cluster) {
+    stop("Error: number of clusters in the treatment arm must be smaller than the total number of clusters!")
   }
 
   if (cutoff <= 0 | cutoff >= 1) {
-    stop("Error: cutoff should be greater than 0 and smaller than 1")
+    stop("Error: cutoff must be greater than 0 and smaller than 1")
   }
 
+  if ((!is.null(stratify))){
+
+  if (is.null(categorical)){
+
+    stop("Error: categorical must be specified when the stratify option is specified")
+
+  } else if (!all(stratify %in% categorical)){
+
+    stop("Error: the categorical variables for stratification must be a subset of the categorical option")
+
+  }
+
+  }
+
+  if(!is.null(stratify)){
+
+    weights <- rep(1, dim(x)[2]) # give weight of 1 to the variables other than the stratification variables
+
+    if (is.character(stratify)) {
+
+      weights[colnames(x) %in% stratify] <- 1000 # give weight of 1000 to each of the stratification variables
+
+     } else if (is.numeric(stratify)) {
+
+      weights[x] <- 1000
+
+       }
+
+    }
 
   data <- x ## store the original data
 
@@ -107,7 +201,7 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
    if (sum(apply(x, 2, function(x) length(unique(x[!is.na(x)]))) <= 1) >= 1) {
      ## check the variables with only one unique value, i.e. no variation
 
-     warning(cat("Warning: each of columns", c(1 : dim(x)[2])[apply(x, 2, function(x) length(unique(x[!is.na(x)]))) <= 1], "has only less than or equal to one unique value and no variation"))
+     warning(cat("Warning: each of columns", c(1 : dim(x)[2])[apply(x, 2, function(x) length(unique(x[!is.na(x)]))) <= 1], "has only less than or equal to one unique value and no variation."))
    }
 
 
@@ -116,7 +210,7 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
    if (!setequal(c(1 : dim(x)[2])[apply(x, 2, function(x) length(unique(x[!is.na(x)]))) <= 4], categorical)) {
      ## check the categorical variables have been correctly specified
 
-     warning(cat("Warning: each of columns", c(1 : dim(x)[2])[apply(x, 2, function(x) length(unique(x))) <= 4], "has less than or equal to 4 unique observations! Please check all the categorical variables have been correctly specified!"))
+     warning(cat("Warning: each of columns", c(1 : dim(x)[2])[apply(x, 2, function(x) length(unique(x))) <= 4], "has less than or equal to 4 unique observations. Please check all the categorical variables have been correctly specified."))
 
 
    }
@@ -131,7 +225,7 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
       if (sum(apply(x, 2, function(x) length(unique(x[!is.na(x)]))) <= 1) >= 1) {
          ## check the variables with only one unique value, i.e. no variation
 
-         warning(cat("Warning: each of", colnames(x)[apply(x, 2, function(x) length(unique(x[!is.na(x)]))) <= 1], "has only less than or equal to one unique value and no variation"))
+         warning(cat("Warning: each of", colnames(x)[apply(x, 2, function(x) length(unique(x[!is.na(x)]))) <= 1], "has only less than or equal to one unique value and no variation."))
        }
 
 
@@ -139,24 +233,25 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
         ## check the categorical variables have been correctly specified
 
 
-        warning(cat("Warning: each of", setdiff(colnames(x)[apply(x, 2, function(x) length(unique(x))) <= 4], categorical), "has less than or equal to 4 unique observations! Please check all the categorical variables have been correctly specified!"))
+        warning(cat("Warning: each of", setdiff(colnames(x)[apply(x, 2, function(x) length(unique(x))) <= 4], categorical), "has less than or equal to 4 unique observations. Please check all the categorical variables have been correctly specified."))
       }
 
 
-      if (!is.null(weight)) { ## if there is user-specified weight vector
+
+      if (!is.null(weights)) { ## if there is user-specified weight vector
 
               for(i in 1:p){
 
             x <- data.frame(x, model.matrix(~factor(x[ , categorical[i]]))[ , -1])
                             # add the dummy variables into the x matrix
 
-            weight <- c(weight, rep(weight[which(categorical[i]==colnames(x))], dim(model.matrix(~factor(x[ , categorical[i]])))[2] - 1))
-                           # set the weight of the dummy variables to be the same as the correpsonding original categorical variables'
+            weights <- c(weights, rep(weights[which(categorical[i]==colnames(x))], dim(model.matrix(~factor(x[ , categorical[i]])))[2] - 1))
+                           # set the weights of the dummy variables to be the same as the correpsonding original categorical variables'
               }
 
-            weight<-weight[-which(colnames(x) %in% categorical)] # removing the initial categorical variables' weights
+            weights <- weights[-which(colnames(x) %in% categorical)] # removing the initial categorical variables' weights
 
-         } else {   ## if there is no user-specified weight vector
+         } else {   ## if there is no user-specified weights vector
 
               for(i in 1:p){
 
@@ -173,7 +268,7 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
             if(sum(apply(x, 2, function(x) length(unique(x[!is.na(x)]))) <= 1) >= 1){
              ## check the variables with only one unique value, i.e. no variation
 
-           warning(cat("Warning: each of columns", c(1:dim(x)[2])[apply(x, 2, function(x) length(unique(x[!is.na(x)]))) <= 1], "has only less than or equal to one unique value and no variation"))
+           warning(cat("Warning: each of columns", c(1:dim(x)[2])[apply(x, 2, function(x) length(unique(x[!is.na(x)]))) <= 1], "has only less than or equal to one unique value and no variation."))
 
           }
 
@@ -181,21 +276,21 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
          if (!setequal(c(1:dim(x)[2])[apply(x, 2, function(x) length(unique(x[!is.na(x)]))) <= 4], categorical)) {
                            ## check the categorical variables have been correctly specified
 
-       warning(cat("Warning: each of columns",setdiff(c(1:dim(x)[2])[apply(x, 2, function(x) length(unique(x))) <= 4], categorical), "has less than or equal to 4 unique observations! Please check all the categorical variables have been correctly specified!"))
+       warning(cat("Warning: each of columns",setdiff(c(1:dim(x)[2])[apply(x, 2, function(x) length(unique(x))) <= 4], categorical), "has less than or equal to 4 unique observations. Please check all the categorical variables have been correctly specified."))
 
 
      }
 
-     if (!is.null(weight)) {
+     if (!is.null(weights)) {
 
        for (i in 1:p) {
 
          x <- data.frame(x, model.matrix(~factor(x[, categorical[i]]))[,-1])
          # adding the dummy variables into the x matrix or data frame
 
-         weight <- c(weight,rep(weight[categorical[i]], dim(model.matrix(~factor(x[ , categorical[i]])))[2] - 1))
+         weights <- c(weights,rep(weights[categorical[i]], dim(model.matrix(~factor(x[ , categorical[i]])))[2] - 1))
        }
-       weight <- weight[-categorical] # removing the initial categorical variable weights
+       weights <- weights[-categorical] # removing the initial categorical variable weights
 
      } else {
 
@@ -217,10 +312,10 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
 
 
 
-   if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there are not too many clusters
+   if (choose(nsub, ntrt_cluster) <= size | nosim == TRUE) {       # enumeration if there are not too many clusters
 
     sim <- 0                     # indicate enumeration
-    emr <- t(combn(nsub, ntrt))      # all the schemes
+    emr <- t(combn(nsub, ntrt_cluster))      # all the schemes
     R <- dim(emr)[1]
     pmt <- matrix(NA, R, nsub)         # indicating clusters to get the treatment
     S <- R
@@ -231,29 +326,29 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
     }
 
     # calculating the B score in an equivalent method
-    if (is.null(weight)) {
+    if (is.null(weights)) {
 
-      if (metric=="L1") {
+      if (balancemetric=="l1") {
 
           BL <- apply(abs((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE)))), 1, sum)
-          # L1 norm B score: if there are no weights specified, the default weights are the standard deviations
+          # l1 norm B score: if there are no weights specified, the default weights are the standard deviations
 
-      } else if (metric=="L2") {
+      } else if (balancemetric=="l2") {
         BL <- apply(((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE))))^2, 1, sum)
-      # L2 norm B score: if there are no weights specified, the default weights are the variances
+      # l2 norm B score: if there are no weights specified, the default weights are the variances
 
       }
 
       } else {
 
-      if (metric=="L1") {
+      if (balancemetric =="l1") {
 
-       BL <- apply(abs((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) * matrix(weight, nsub, np, byrow = TRUE) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE)))), 1, sum)
-      # L1 norm B score: if there are weights specified
+       BL <- apply(abs((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) * matrix(weights, nsub, np, byrow = TRUE) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE)))), 1, sum)
+      # l1 norm B score: if there are weights specified
 
-      } else if (metric=="L2") {
-        BL <- apply(((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) * matrix(weight, nsub, np, byrow = TRUE) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE))))^2, 1, sum)
-      # L2 norm B score: if there are weights specified
+      } else if (balancemetric=="l2") {
+        BL <- apply(((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) * matrix(weights, nsub, np, byrow = TRUE) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE))))^2, 1, sum)
+      # l2 norm B score: if there are weights specified
       }
       }
 
@@ -288,7 +383,7 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
 
       if (numschemes >= R) {
 
-        stop("Error: the fixed number of schemes in the constrained space for constrained randomization is larger than the total number of randomization schemes.")
+        stop("Error: the fixed number of schemes in the constrained space for constrained randomization must be smaller or equal to the total number of randomization schemes.")
       }
 
       cho <- numschemes
@@ -317,9 +412,11 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
 
     BL_Quantiles <- quantile(BL, prob = c(0, 0.05, 0.1, 0.2, 0.25, 0.3, 0.5, 0.75, 0.95, 1))
 
-    BL_Quantiles <- c(BLcut, BLchoice, mean(BL), sd(BL), BL_Quantiles)
+    BL_Quantiles <- c(BLchoice, BLcut, mean(BL), sd(BL), BL_Quantiles)
 
-    names(BL_Quantiles)[c(1, 2, 3, 4, 5, 14)] <- c("CR-Benchmark", "Selected Point", "Mean", "SD", "Min", "Max")
+    BL_Quantiles <- round(BL_Quantiles, 3)
+
+    names(BL_Quantiles)[c(1, 2, 3, 4, 5, 14)] <- c("score (selected scheme)", "cutoff score", "Mean", "SD", "Min", "Max")
 
 
 
@@ -336,7 +433,7 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
 
     for (s in 1:S) {
 
-      trt <- sample(1:nsub, ntrt)
+      trt <- sample(1:nsub, ntrt_cluster)
 
       pmt[s, trt] <- 1
 
@@ -351,26 +448,26 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
 
 
     # calculating the B score in an equivalent method
-    if (is.null(weight)) {
+    if (is.null(weights)) {
 
-      if (metric=="L1") {
+      if (balancemetric=="l1") {
 
         BL <- apply(abs((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE)))), 1, sum)
-        # L1 norm B score: if there are no weights specified, the default weights are the standard deviations
+        # l1 norm B score: if there are no weights specified, the default weights are the standard deviations
 
-      } else if (metric=="L2") {BL <- apply(((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE))))^2, 1, sum)
-      # L2 norm B score: if there are no weights specified, the default weights are the variances
+      } else if (balancemetric=="l2") {BL <- apply(((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE))))^2, 1, sum)
+      # l2 norm B score: if there are no weights specified, the default weights are the variances
       }
 
       } else {
 
-      if (metric=="L1") {
+      if (balancemetric=="l1") {
 
-        BL <- apply(abs((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) * matrix(weight, nsub, np, byrow = TRUE) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE)))), 1, sum)
-         # L1 norm B score: if there are weights specified
+        BL <- apply(abs((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) * matrix(weights, nsub, np, byrow = TRUE) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE)))), 1, sum)
+         # l1 norm B score: if there are weights specified
 
-      } else if (metric=="L2") {BL <- apply(((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) * matrix(weight, nsub, np, byrow = TRUE) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE))))^2, 1, sum)
-      # L2 norm B score: if there are weights specified
+      } else if (balancemetric=="l2") {BL <- apply(((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) * matrix(weights, nsub, np, byrow = TRUE) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE))))^2, 1, sum)
+      # l2 norm B score: if there are weights specified
       }
       }
 
@@ -404,7 +501,7 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
 
       if (numschemes >= R) {
 
-        stop("Error: the fixed number of schemes in the constrained space for constrained randomization is larger than the total number of randomization schemes.")
+        stop("Error: the fixed number of schemes in the constrained space for constrained randomization must be smaller or equal to the total number of randomization schemes.")
       }
 
       cho <- numschemes
@@ -431,9 +528,12 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
     ## histogram of Bscores mean sd, B score benchmark, chosen B score, min max  p5 p10 p20 p25 p30 p50 p75 p95
     BL_Quantiles <- quantile(BL, prob = c(0, 0.05, 0.1, 0.2, 0.25, 0.3, 0.5, 0.75, 0.95, 1))
 
-    BL_Quantiles <- c(BLcut, BLchoice, mean(BL), sd(BL), BL_Quantiles)
+    BL_Quantiles <- c(BLchoice, BLcut, mean(BL), sd(BL), BL_Quantiles)
 
-    names(BL_Quantiles)[c(1, 2, 3, 4, 5, 14)] <- c("CR-Benchmark", "Selected Point", "Mean", "SD", "Min", "Max")
+    BL_Quantiles <- round(BL_Quantiles, 3)
+
+
+    names(BL_Quantiles)[c(1, 2, 3, 4, 5, 14)] <- c("score (selected scheme)", "cutoff score", "Mean", "SD", "Min", "Max")
 
     }
 
@@ -492,11 +592,11 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
 
    if (is.null(numschemes)) {
 
-    mtext(paste(cutoff, "quantile", metric, "balance score benchmark of", round(BLcut, 3)), col = 'red', side = 1, outer = FALSE, line = 3)
+    mtext(paste("The", cutoff, "quantile of the", balancemetric, "balance score is", round(BLcut, 3)), col = 'black', side = 1, outer = FALSE, line = 3)
 
        } else {
 
-     mtext(paste(numschemes, "schemes", metric, "balance score benchmark of", round(BLcut, 3)), col = "red", side = 1, outer = FALSE, line = 3)
+     mtext(paste("The", numschemes, "schemes", balancemetric, "balance score is", round(BLcut, 3)), col = "black", side = 1, outer = FALSE, line = 3)
 
 
       }
@@ -509,44 +609,53 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
   }
   # output the balance scores across entire randomization space as well as output its histogram
 
-    # the allocation of schemes from L1 norm B score or L2 norm B score
-    Allocation <- cbind(id, inter)
+    # the allocation of schemes from l1 norm B score or l2 norm B score
+    allocation <- cbind(clustername, inter)
 
-    colnames(Allocation) <- c("id", "allocation")
+    colnames(allocation) <- c("clustername", "allocation")
 
-    assignment_message <- paste("You have indicated that you want to assign", ntrt, "clusters to treatment", "and", n - ntrt, "to control")
+    allocation <- as.data.frame(allocation)
+
+    BL_Quantiles <- data.frame(names(BL_Quantiles), BL_Quantiles)
+
+    rownames(BL_Quantiles) <- NULL
+
+    colnames(BL_Quantiles) <- NULL
+
+    assignment_message <- paste("You have indicated that you want to assign", ntrt_cluster, "clusters to treatment", "and", ntotal_cluster - ntrt_cluster, "to control")
 
     # indicate a enumeration process or a simulation process with the detailed number of schemes
     if(sim == 1){
 
-             scheme_message<-paste("Simulating", S, "schemes with", R, "unique schemes for", ntrt, "clusters in the treatment arm out of", n, "clusters in total")
+             scheme_message<-paste("Simulating", S, "schemes with", R, "unique schemes for", ntrt_cluster, "clusters in the treatment arm out of", ntotal_cluster, "clusters in total")
 
           } else {
 
-    scheme_message<-paste("Enumerating all the", R, "schemes for", ntrt, "clusters in the treatment arm out of", n, "clusters in total")
+    scheme_message<-paste("Enumerating all the", R, "schemes for", ntrt_cluster, "clusters in the treatment arm out of", ntotal_cluster, "clusters in total")
 
       }
 
 
-      # indicate the benchmark of BL for constrained randomization
+      # indicate the cutoff for constrained randomization
      if (is.null(numschemes)) {
 
-       BLcut_message <- paste("By cutoff quantile of", cutoff, "of", metric, ", the BL constrained randomization benchmark is", round(BLcut, 3))
+       cutoff_message <- paste("The quantile cutoff value is", cutoff, "based on the", balancemetric, "balance metric, the cutoff balance score is", round(BLcut, 3))
 
        } else {
 
-       BLcut_message <- paste("By fixed number of schemes of", numschemes, "of", metric, ", the BL constrained randomization benchmark is", round(BLcut, 3))
+       cutoff_message <- paste("The fixed number of schemes is", numschemes, "based on the", balancemetric, "balance metric, the cutoff balance score is", round(BLcut, 3))
       }
 
 
       # indicate the chosen scheme's BL from the BL criterion
-       BLchoice_message <- paste("Balance score of selected scheme by", metric ,"has B score of", round(BLchoice, 3), collapse=' ')
+       choice_message <- paste("Balance score of selected scheme by", balancemetric ,"is", round(BLchoice, 3), collapse=' ')
 
 
 
-     data_merge <- data.frame(inter, id, data)
-      # data frame including the chosen scheme from BL, cluster id and the covariates
+     data_merge <- data.frame(inter, clustername, data)
+      # data frame including the chosen scheme from BL, cluster name and the covariates
 
+     colnames(data_merge)[1] <- "arm"
 
      if(!is.null(categorical)){
      # put the categorical variables into factors to prepare for the "CreateTableOne" function
@@ -567,21 +676,25 @@ cvcrand = function(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt, cut
 
     }
 
-      Descriptive_statistics <- CreateTableOne( vars = colnames(data_merge)[c(-1, -2)], strata=c("inter"), data=data_merge)
-       # create the descriptive table to compare the two arms from constrained randomization using BL
+      Descriptive_statistics <- CreateTableOne( vars = colnames(data_merge)[c(-1, -2)], strata=c("arm"), data=data_merge, test =  FALSE)
+       # create the descriptive table to compare the two arms from constrained randomization
 
+     invisible(capture.output(DS <- as.data.frame(print(Descriptive_statistics))))
+     # transform the table into a data frame
 
-  return(list(metric = metric,
-             Allocation = Allocation,
-             Bscores = BL_Quantiles,
+     colnames(DS)[1:2] <- c("arm = 0", "arm = 1")
+
+  return(list(balancemetric = balancemetric,
+             allocation = allocation,
+             bscores = BL_Quantiles,
              assignment_message = assignment_message,
              scheme_message = scheme_message,
-             BLcut_message = BLcut_message,
-             BLchoice_message = BLchoice_message,
-             data_BL = data_merge,
-             BL_result = Descriptive_statistics))
+             cutoff_message = cutoff_message,
+             choice_message = choice_message,
+             data_CR = data_merge,
+             baseline_table = DS))
 
-  ## return the allocations, number of schemes, BL cutoff and choice messages, resulted arms comparisons from BL
+  ## return the allocations, number of schemes, cutoff and choice messages, resulted arms comparisons from BL
 
   }
 

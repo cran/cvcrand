@@ -4,44 +4,45 @@
 \alias{cptest}
 \title{Clustered permutation test for cluster randomized trials}
 \usage{
-cptest(outcome, id, x, cspacedatname, outcometype, categorical = NULL)
+cptest(outcome, clustername, z, cspacedatname, outcometype,
+  categorical = NULL)
 }
 \arguments{
-\item{outcome}{a vector specifying the individual outcome}
+\item{outcome}{a vector specifying the individual-level outcome.}
 
-\item{id}{a vector specifying cluster name}
+\item{clustername}{a vector specifying the identification variable of the cluster.}
 
-\item{x}{a matrix or a data frame specifying the individual-level covariates to analyze}
+\item{z}{a data frame of covariates to be adjusted for in the permutation analysis.}
 
-\item{cspacedatname}{the csv dataset containing the saved randomization space. This dataset contains the permutation matrix, as well as a variable indicating which row of the permutation matrix was saved as the final schemes.}
+\item{cspacedatname}{gives the string path of the csv dataset containing the saved randomization space. This dataset contains the permutation matrix, as well as an indicator variable in the first column indicating which row of the permutation matrix was selected as the final schemes to be implemented in practice.}
 
-\item{outcometype}{the type of regression model that should be run. Options are "continuous" for linear regression fit and "binary" for logistic regression fit.}
+\item{outcometype}{the type of regression model that should be run. Options are \code{"continuous"} for linear regression and \code{"binary"} for logistic regression.}
 
-\item{categorical}{a vector specifying categorical (including binary) variables. This can be names of the columns or numbers of indexes of columns)}
+\item{categorical}{a vector specifying categorical (including binary) variables. This can be names of the columns or number indexes of columns, but cannot be both. Suppose there are \code{p} categories for a categorical variable, \code{cptest} function creates \code{p-1} dummy variables and drops the reference level if the variable is specified as a factor. Otherwise, the first level in the alphanumerical order will be dropped. If the user wants to specify a different level to drop for a \code{p}-level categorical variable, the user can create \code{p-1} dummy variables and these can instead be supplied as covariates to the \code{cptest} function. Then, the user needs to specify the dummy variables created themselves to be \code{categorical} when running \code{cptest}. In addition, the user could also set the variable as a factor with the specific reference level. The user must ensure that the same level of the categorical variable is excluded as was excluded when running \code{cvcrand}, by coding the variables the same way as in the design phase. This is the only optional argument of the \code{cptest} function. All others are required.}
 }
 \value{
 \code{FinalScheme} the final scheme in the permutation matrix
 
 \code{pvalue} the p-value of the intervention effect from the clustered permutation test
 
-\code{pvalue_statement} the statement of the p-value of the intervention effect from the clustered permutation test
+\code{pvalue_statement} the statement about the p-value of the intervention effect from the clustered permutation test
 }
 \description{
-cptest performs clustered permutation test on the individual oucome for cluster
+cptest performs clustered permutation test on the individual-level outcome data for cluster
 randomized trials (CRTs). The type of the outcome can be specified by the user to be "continuous" or
 "binary".
 
-With specified outcome type being "continuous" or "binary", linear regression or logistic regression is applied on the outcome and the covariates specified for all individuals. Cluster residual means are collected. With the constrained space,
-the contrast statistic is created from the schemes and the cluster residual means. The permutation test is then conducted on the contrast statistic for the scheme actually utilized.
+With specified outcome type being "continuous" or "binary", linear regression or logistic regression is applied on the outcome and the covariates specified for all individuals. Cluster residual means are computed. Within the constrained space,
+the contrast statistic is created from the randomization schemes and the cluster residual means. The permutation test is then conducted by comparing the contrast statistic for the scheme actually utilized to all other schemes in the constrained space.
 }
 \examples{
 \dontrun{
 Analysis_result <- cptest(outcome = Dickinson_outcome$outcome,
-                          id = Dickinson_outcome$county,
-                          x = data.frame(Dickinson_outcome[, c(-1, -7)]),
-                          cspacedatname="dickinson_constrained.csv",
-                          outcometype="binary",
-                          categorical=c("location","incomecat"))
+                          clustername = Dickinson_outcome$county,
+                          z = data.frame(Dickinson_outcome[ , c(2, 3, 4, 5, 6)]),
+                          cspacedatname = "dickinson_constrained.csv",
+                          outcometype = "binary",
+                          categorical = c("location","incomecat"))
 }
 
 }
@@ -49,6 +50,14 @@ Analysis_result <- cptest(outcome = Dickinson_outcome$outcome,
 Gail, M.H., Mark, S.D., Carroll, R.J., Green, S.B. and Pee, D., 1996. On design considerations and randomization based inference for community intervention trials. Statistics in medicine, 15(11), pp.1069-1092.
 
 Li, F., Lokhnygina, Y., Murray, D.M., Heagerty, P.J. and DeLong, E.R., 2016. An evaluation of constrained randomization for the design and analysis of group randomized trials. Statistics in medicine, 35(10), pp.1565-1579.
+
+Li, F., Turner, E. L., Heagerty, P. J., Murray, D. M., Vollmer, W. M., & DeLong, E. R. (2017). An evaluation of constrained randomization for the design and analysis of group randomized trials with binary outcomes. Statistics in medicine, 36(24), 3791-3806.
+
+Gallis, J. A., Li, F., Yu, H., Turner, E. L. (In Press).  cvcrand and cptest: Efficient design and analysis of cluster randomized trials.  Stata Journal.
+
+Gallis, J. A., Li, Fl. Yu, H., Turner, E. L. (2017).  cvcrand and cptest: Efficient design and analysis of cluster randomized trials.  Stata Conference.  https://www.stata.com/meeting/baltimore17/slides/Baltimore17_Gallis.pdf.
+
+Dickinson, L. M., Beaty, B., Fox, C., Pace, W., Dickinson, W. P., Emsermann, C., & Kempe, A. (2015). Pragmatic cluster randomized trials using covariate constrained randomization: A method for practice-based research networks (PBRNs). The Journal of the American Board of Family Medicine, 28(5), 663-672.
 }
 \author{
 Hengshi Yu <hengshi@umich.edu>, John A. Gallis <john.gallis@duke.edu>, Fan Li <frank.li@duke.edu>, Elizabeth L. Turner <liz.turner@duke.edu>

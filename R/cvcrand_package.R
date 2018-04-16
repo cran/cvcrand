@@ -7,5 +7,5 @@
 #'@import tableone
 #'@importFrom graphics abline box hist mtext par title
 #'@importFrom stats as.formula glm lm model.matrix quantile sd
-#'@importFrom utils combn read.csv write.csv
+#'@importFrom utils combn read.csv write.csv capture.output
 NULL

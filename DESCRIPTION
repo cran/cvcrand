@@ -1,8 +1,8 @@
 Package: cvcrand
 Type: Package
 Title: Efficient Design and Analysis of Cluster Randomized Trials
-Version: 0.0.1
-Date: 2017-11-28
+Version: 0.0.2
+Date: 2018-4-16
 Authors@R: c(person(given = "Hengshi", family = "Yu", role = c("aut", "cre"), 
              email="hengshi@umich.edu"), 
              person(given = "John A.", family = "Gallis", role ="aut", 
@@ -23,16 +23,16 @@ Description: Constrained randomization by Raab and Butcher (2001) <doi:10.1002/1
             values of cluster-level covariates and cluster permutation test on the individual-level outcome for cluster randomized trials. 
 License: GPL (>= 2)
 LazyData: TRUE
-Depends: R (>= 3.3.1)
+Depends: R (>= 3.4.0)
 Imports: tableone
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2017-11-28 18:43:07 UTC; Hengshi Yu (Oliver)
+Packaged: 2018-04-16 21:05:03 UTC; Hengshi Yu (Oliver)
 Author: Hengshi Yu [aut, cre],
   John A. Gallis [aut],
   Fan Li [aut],
   Elizabeth L. Turner [aut]
 Repository: CRAN
-Date/Publication: 2017-11-28 19:06:15 UTC
+Date/Publication: 2018-04-16 22:13:27 UTC

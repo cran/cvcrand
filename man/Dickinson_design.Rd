@@ -8,10 +8,15 @@
 \describe{
   \item{county}{the identification for the county}
   \item{location}{urban or rural}
-  \item{inciis}{percentage of children ages 19-35 months in the Colorado Immunization Information System (CIIS)}
+  \item{inciis}{percentage of children aged 19-35 months in the Colorado Immunization Information System (CIIS)}
+  \item{numberofchildrenages1935months}{number of children aged 19-35 months}
   \item{uptodateonimmunizations}{percentage of children already up-to-date on their immunization}
-  \item{hispanic}{percentage of Hispanic}
+  \item{africanamerican}{percentage of African American}
+  \item{hispanic}{percentage of Hispanic ethnicity}
+  \item{income}{average income}
   \item{incomecat}{average income categorized into tertiles}
+  \item{pediatricpracticetofamilymedicin}{pediatric practice-to-family medicine practice ratio}
+  \item{communityhealthcenters}{number of community health centers}
 }}
 \source{
 \url{http://www.jabfm.org/content/28/5/663/T5.expansion.html}

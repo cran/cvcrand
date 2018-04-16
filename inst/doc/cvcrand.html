@@ -10,9 +10,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<meta name="author" content="Hengshi Yu, John A. Gallis, Fan Li, and Elizabeth L. Turner" />
+<meta name="author" content="Hengshi Yu, Fan Li, John A. Gallis, and Elizabeth L. Turner" />
 
-<meta name="date" content="2017-11-28" />
+<meta name="date" content="2018-04-16" />
 
 <title>cvcrand package</title>
 
@@ -69,8 +69,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">cvcrand package</h1>
-<h4 class="author"><em>Hengshi Yu, John A. Gallis, Fan Li, and Elizabeth L. Turner</em></h4>
-<h4 class="date"><em>2017-11-28</em></h4>
+<h4 class="author"><em>Hengshi Yu, Fan Li, John A. Gallis, and Elizabeth L. Turner</em></h4>
+<h4 class="date"><em>2018-04-16</em></h4>
 
 
 
@@ -80,30 +80,28 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>Given the baseline values of some cluster-level covariates, users can perform a constrained randomization on the clusters into two arms, with an optional input of user-defined weights on the covariates.</p>
 <p>At the end of the study, the individual outcome is collected. The <code>cvcrand</code> package also performs clustered permutation test on either continuous outcome or binary outcome adjusted for some individual-level covariates, producing p-value of the intervention effect.</p>
 </div>
-<div id="design-constrained-randomization" class="section level2">
-<h2>Design: constrained randomization</h2>
-<p>In the design of CRTs with two arms, users can use the <code>cvcrand()</code> function to perform constrained randomization. And for the analysis part, user will use the <code>cptest()</code> function for clustered permutation test.</p>
+<div id="design-covariate-constrained-randomization" class="section level2">
+<h2>Design: covariate-constrained randomization</h2>
+<p>In the design of CRTs with two arms, users can use the <code>cvcrand()</code> function to perform covariate-constrained randomization. And for the analysis part, user would use the <code>cptest()</code> function for clustered permutation test.</p>
 <p>A cluster is the unit of randomization for a cluster randomized trial. Thus, when the number of clusters is small, there might be some baseline imbalance from the randomization between the arms. Constrained randomization constrained the randomization space to randomization schemes with smaller difference among the covariates between the two arms.</p>
-<p>The balance score for constrained randomization in the program is developed from <span class="citation">(Raab and Butcher 2001)</span>. Suppose <span class="math inline">\(n\)</span>, <span class="math inline">\(n_T\)</span>, and <span class="math inline">\(n_C\)</span> are the total number of clusters, the number of clusters in the treatment arm and the control arm respectively. Suppose also that there are <span class="math inline">\(K\)</span> cluster-level variables including the continuous covariates as well as the dummy variables created from the categorical covariates. <span class="math inline">\(\bar{x}_{Tk}\)</span> and <span class="math inline">\(\bar{x}_{Ck}\)</span> are the means of the <span class="math inline">\(kth\)</span> variable in the treatment arm and the control arm respectively. <span class="math inline">\(\omega_k\)</span> is the inverse of the standard deviation of the <span class="math inline">\(kth\)</span> variable among all <span class="math inline">\(n\)</span> clusters. There are two choices of metric for the balance score. If <code>&quot;L1&quot;</code> metric is specified and there is no user-defined <code>weight</code> of <span class="math inline">\(C_k;\ k=1,2,...,K\)</span>, the balance score is defined as follows.</p>
-<p><span class="math inline">\(B_{(l1)}=\left(\frac{n_Tn_C}{n}\right)\sum_{k=1}^{K}\omega_k\left|\bar{x}_{Tk}-\bar{x}_{Ck}\right|\)</span></p>
-<p>And if there is user-defined <code>weight</code> of <span class="math inline">\(C_k;\ k=1,2,...,K\)</span>, the <code>&quot;L1&quot;</code> balance score is: <span class="math inline">\(B_{(l1)}=\left(\frac{n_Tn_C}{n}\right)\sum_{k=1}^{K}C_k\omega_k\left|\bar{x}_{Tk}-\bar{x}_{Ck}\right|\)</span>.</p>
-<p>Another metric is <code>&quot;L2&quot;</code>. The balance score with and without the user-defined <code>weight</code> is defined as follows:</p>
-<p><span class="math inline">\(B_{(l2)}=\left(\frac{n_Tn_C}{n}\right)^{2}\sum_{k=1}^{K}\omega_k^2(\bar{x}_{Tk}-\bar{x}_{Ck})^2\)</span> and <span class="math inline">\(B_{(l2)}=\left(\frac{n_Tn_C}{n}\right)^{2}\sum_{k=1}^{K}C_k^2\omega_k^2(\bar{x}_{Tk}-\bar{x}_{Ck})^2\)</span></p>
-<p>With the baseline values of the specified cluster-level covariates in a cluster randomized trail, the <code>cvcrand()</code> function in the <code>cvcrand</code> package is used to perform the consrailed randomization.</p>
-<p>Each categorical variable is transformed into dummy variables to calculate the balance score. Specifically, the level of each categorical variable dropped when it is transformed into several dummiy variables is the first level in the alphanumerical order. If the user wants to specify a different level of each categorical variable to drop, they might create dummy variables themselves before running the <code>cvcrand()</code> function. Then, the user needs to specify the dummy variables created themselves to be <code>&quot;categorical&quot;</code> when running <code>cvcrand()</code>.</p>
+<p>The balance score for constrained randomization in the program is developed from <span class="citation">(Raab and Butcher 2001)</span>. Suppose <span class="math inline">\(n\)</span>, <span class="math inline">\(n_T\)</span>, and <span class="math inline">\(n_C\)</span> are the total number of clusters, the number of clusters in the treatment arm and the control arm respectively. Suppose also that there are <span class="math inline">\(K\)</span> cluster-level variables including the continuous covariates as well as the dummy variables created from the categorical covariates. <span class="math inline">\(x_{ik}\)</span> is the <span class="math inline">\(k\)</span>th covariate (<span class="math inline">\(k=1,\ldots,K\)</span>) of cluster <span class="math inline">\(i\)</span>. <span class="math inline">\(\bar{x}_{Tk}=\sum_{i=1}^{n_T}x_{ik}/n_T\)</span> and <span class="math inline">\(\bar{x}_{Ck}=\sum_{i=n_T+1}^{n}x_{ik}/n_C\)</span> are the means of the <span class="math inline">\(k\)</span>th cluster-level variable in the treatment arm and the control arm, respectively, and <span class="math inline">\(\omega_{k}\)</span> is a pre-determined weight for the <span class="math inline">\(k\)</span>th variable. We choose <span class="math inline">\(\omega_{k}\)</span> to be the inverse of the variance of the <span class="math inline">\(k\)</span>th variable across all clusters following <span class="citation">(Raab and Butcher 2001)</span> and <span class="citation">(Fan Li et al. 2016)</span>, namely <span class="math inline">\(\omega_k={1}/{s_k^2}=\frac{n-1}{\sum_{i=1}^n(x_{ik}-\bar{x}_k)^2}\)</span> with <span class="math inline">\(\bar{x}_k=\sum_{i=1}^nx_{ik}/n\)</span>.</p>
+<p>There are two choices of metric for the balance score. The balance score of the <code>&quot;l2&quot;</code> metric is defined as <span class="math inline">\(B_{(l2)}=\sum_{k=1}^{K}\omega_k(\bar{x}_{Tk}-\bar{x}_{Ck})^2\)</span>. And if <code>&quot;l1&quot;</code> metric from <span class="citation">(F Li et al. 2017)</span> is specified, the balance score is defined as <span class="math inline">\(B_{(l1)}=\sum_{k=1}^{K}\tilde{\omega}_k\left|\bar{x}_{Tk}-\bar{x}_{Ck}\right|\)</span>, where <span class="math inline">\(\tilde{\omega}_k\)</span> is chosen to be the inverse of the standard deviation of the <span class="math inline">\(k\)</span>th variable <span class="math inline">\(s_k\)</span>.</p>
+<p>To reflect the relative importance of different baseline covariates, one may include user-defined weights in the <code>&quot;l1&quot;</code> and <code>&quot;l2&quot;</code> balance metrics. The <code>&quot;l2&quot;</code> balance metric is set to be <span class="math inline">\(B_{(l2)}=\sum_{k=1}^{K}d_k\omega_k(\bar{x}_{Tk}-\bar{x}_{Ck})^2\)</span>, where <span class="math inline">\(d_k\)</span> is the user-defined weight for the <span class="math inline">\(k\)</span>th variable. By default, <span class="math inline">\(d_k=1\)</span> for all variables. A large user-defined weight <span class="math inline">\(d_k&gt;1\)</span> could be assigned to a variable of importance when assessing the balance scores. Similarly, we modify the <span class="math inline">\(l1\)</span> balance metric by allowing for user-defined weight as <span class="math inline">\(B_{(l1)}=\sum_{k=1}^{K}d_k\tilde{\omega}_k\left|\bar{x}_{Tk}-\bar{x}_{Ck}\right|\)</span>.</p>
+<p>With the baseline values of the specified cluster-level covariates in a cluster randomized trail, the <code>cvcrand()</code> function in the <code>cvcrand</code> package is used to perform the covariate-constrained randomization.</p>
+<p>Each categorical variable is transformed into dummy variables to calculate the balance score. When transforming a categorical variable to dummy variables, the reference level will be dropped if the categorical variable is specified as a factor. Otherwise, the first level in the alphanumerical order will be dropped. Users can also specify a certain reference level for each categorical variable by manually coding dummy variables before running the <code>cvcrand()</code> function.</p>
 </div>
-<div id="cvcrand-example" class="section level2">
-<h2><code>cvcrand()</code> example</h2>
-<p>Study 1 in <span class="citation">(L. M. Dickinson et al. 2015)</span> is about two approaches (interventions) for increasing the “up-to-date” immunization rate in 19- to 35-month-old children. They planned to randomize 16 counties in Colorado 1:1 to either a population-based approach or a practice-based approach. There are several county-level variables. The program will randomize on a subset of these variables. The continuous variable of average income is categorized to illustrate the use of the <code>cvcrand()</code> on multi-category variables. And the percentage in CIIS variable is trancated at 100%.</p>
+<div id="cvcrand-example-for-covariate-constrained-randomization" class="section level2">
+<h2><code>cvcrand()</code> example for covariate-constrained randomization</h2>
+<p>A study presented by <span class="citation">(L. M. Dickinson et al. 2015)</span> is about two approaches (interventions) for increasing the “up-to-date” immunization rate in 19- to 35-month-old children. They planned to randomize 16 counties in Colorado 1:1 to either a population-based approach or a practice-based approach. There are several county-level variables. The program will randomize on a subset of these variables. The continuous variable of average income is categorized to illustrate the use of the <code>cvcrand()</code> on multi-category variables. The percentage in Colorado Immunization Information System (CIIS) variable is trancated at 100%.</p>
 <table>
 <thead>
 <tr class="header">
 <th align="right">county</th>
 <th align="left">location</th>
 <th align="right">inciis</th>
+<th align="right">numberofchildrenages1935months</th>
 <th align="right">uptodateonimmunizations</th>
-<th align="right">hispanic</th>
-<th align="left">incomecat</th>
+<th align="right">africanamerican</th>
 </tr>
 </thead>
 <tbody>
@@ -111,231 +109,420 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <td align="right">1</td>
 <td align="left">Rural</td>
 <td align="right">94</td>
+<td align="right">366</td>
 <td align="right">37</td>
-<td align="right">44</td>
-<td align="left">Low</td>
+<td align="right">2</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
 <td align="left">Rural</td>
 <td align="right">85</td>
+<td align="right">1274</td>
 <td align="right">39</td>
-<td align="right">23</td>
-<td align="left">High</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
 <td align="left">Rural</td>
 <td align="right">85</td>
+<td align="right">614</td>
 <td align="right">42</td>
-<td align="right">12</td>
-<td align="left">Low</td>
+<td align="right">5</td>
 </tr>
 <tr class="even">
 <td align="right">4</td>
 <td align="left">Rural</td>
 <td align="right">93</td>
+<td align="right">1720</td>
 <td align="right">39</td>
-<td align="right">18</td>
-<td align="left">High</td>
+<td align="right">1</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
 <td align="left">Rural</td>
 <td align="right">82</td>
+<td align="right">242</td>
 <td align="right">31</td>
-<td align="right">6</td>
-<td align="left">High</td>
+<td align="right">1</td>
 </tr>
 <tr class="even">
 <td align="right">6</td>
 <td align="left">Rural</td>
 <td align="right">80</td>
+<td align="right">350</td>
 <td align="right">27</td>
-<td align="right">15</td>
-<td align="left">Med</td>
+<td align="right">3</td>
 </tr>
 <tr class="odd">
 <td align="right">7</td>
 <td align="left">Rural</td>
 <td align="right">94</td>
+<td align="right">401</td>
 <td align="right">49</td>
-<td align="right">38</td>
-<td align="left">Low</td>
+<td align="right">1</td>
 </tr>
 <tr class="even">
 <td align="right">8</td>
 <td align="left">Rural</td>
 <td align="right">100</td>
+<td align="right">234</td>
 <td align="right">37</td>
-<td align="right">39</td>
-<td align="left">Low</td>
+<td align="right">1</td>
 </tr>
 <tr class="odd">
 <td align="right">9</td>
 <td align="left">Urban</td>
 <td align="right">93</td>
+<td align="right">3779</td>
 <td align="right">51</td>
-<td align="right">35</td>
-<td align="left">Med</td>
+<td align="right">4</td>
 </tr>
 <tr class="even">
 <td align="right">10</td>
 <td align="left">Urban</td>
 <td align="right">89</td>
+<td align="right">11807</td>
 <td align="right">51</td>
-<td align="right">17</td>
-<td align="left">Med</td>
+<td align="right">10</td>
 </tr>
 <tr class="odd">
 <td align="right">11</td>
 <td align="left">Urban</td>
 <td align="right">83</td>
+<td align="right">9453</td>
 <td align="right">54</td>
-<td align="right">7</td>
-<td align="left">High</td>
+<td align="right">2</td>
 </tr>
 <tr class="even">
 <td align="right">12</td>
 <td align="left">Urban</td>
 <td align="right">70</td>
+<td align="right">12354</td>
 <td align="right">29</td>
-<td align="right">13</td>
-<td align="left">Med</td>
+<td align="right">8</td>
 </tr>
 <tr class="odd">
 <td align="right">13</td>
 <td align="left">Urban</td>
 <td align="right">93</td>
+<td align="right">10008</td>
 <td align="right">50</td>
-<td align="right">13</td>
-<td align="left">High</td>
+<td align="right">2</td>
 </tr>
 <tr class="even">
 <td align="right">14</td>
 <td align="left">Urban</td>
 <td align="right">85</td>
+<td align="right">5343</td>
 <td align="right">36</td>
-<td align="right">10</td>
-<td align="left">Med</td>
+<td align="right">2</td>
 </tr>
 <tr class="odd">
 <td align="right">15</td>
 <td align="left">Urban</td>
 <td align="right">82</td>
+<td align="right">3143</td>
 <td align="right">38</td>
-<td align="right">39</td>
-<td align="left">Low</td>
+<td align="right">3</td>
 </tr>
 <tr class="even">
 <td align="right">16</td>
 <td align="left">Urban</td>
 <td align="right">84</td>
+<td align="right">6056</td>
 <td align="right">43</td>
-<td align="right">28</td>
-<td align="left">Med</td>
+<td align="right">1</td>
 </tr>
 </tbody>
 </table>
-<p>For the constrained randomization, we used the <code>cvcrand()</code> function to randomize 8 out of the 16 counties into the practice-based. For the definition of the whole randomization space, if the total number of all possible schemes is smaller than <code>50,000</code>, we enumerate all the schemes as the whole randomization space. Otherwise, we simulate <code>50,000</code> schemes and choose the unique shemes among them as the whole randomization space. We calculate the balance scores of <code>&quot;L2&quot;</code> metric on three continuous covariates as well as two categorical covariates of location and income category. Location has <code>&quot;Rural&quot;</code> and <code>&quot;Urban&quot;</code>. The level of <code>&quot;Rural&quot;</code> was then dropped in <code>cvcrand()</code>. As income category has three levels of <code>&quot;low&quot;</code>, <code>&quot;med&quot;</code>, and <code>&quot;high&quot;</code>, the level of <code>&quot;high&quot;</code> was dropped to create dummy variables according to the alphanumerical order as well. Then we constrained the randomization space to the schemes with <code>&quot;L2&quot;</code> balance scores less than the <code>0.1</code> quantile of that in the whole randomization space. Finally, a randomization scheme is sampled from the constrained space.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="right">hispanic</th>
+<th align="right">pediatricpracticetofamilymedicin</th>
+<th align="right">communityhealthcenters</th>
+<th align="left">incomecat</th>
+<th align="right">income</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">44</td>
+<td align="right">1.00</td>
+<td align="right">1</td>
+<td align="left">Low</td>
+<td align="right">35988</td>
+</tr>
+<tr class="even">
+<td align="right">23</td>
+<td align="right">0.08</td>
+<td align="right">0</td>
+<td align="left">High</td>
+<td align="right">67565</td>
+</tr>
+<tr class="odd">
+<td align="right">12</td>
+<td align="right">0.33</td>
+<td align="right">3</td>
+<td align="left">Low</td>
+<td align="right">35879</td>
+</tr>
+<tr class="even">
+<td align="right">18</td>
+<td align="right">0.33</td>
+<td align="right">6</td>
+<td align="left">High</td>
+<td align="right">63617</td>
+</tr>
+<tr class="odd">
+<td align="right">6</td>
+<td align="right">0.20</td>
+<td align="right">0</td>
+<td align="left">High</td>
+<td align="right">59118</td>
+</tr>
+<tr class="even">
+<td align="right">15</td>
+<td align="right">0.00</td>
+<td align="right">3</td>
+<td align="left">Med</td>
+<td align="right">57179</td>
+</tr>
+<tr class="odd">
+<td align="right">38</td>
+<td align="right">0.20</td>
+<td align="right">3</td>
+<td align="left">Low</td>
+<td align="right">29738</td>
+</tr>
+<tr class="even">
+<td align="right">39</td>
+<td align="right">0.00</td>
+<td align="right">1</td>
+<td align="left">Low</td>
+<td align="right">37350</td>
+</tr>
+<tr class="odd">
+<td align="right">35</td>
+<td align="right">0.15</td>
+<td align="right">11</td>
+<td align="left">Med</td>
+<td align="right">52923</td>
+</tr>
+<tr class="even">
+<td align="right">17</td>
+<td align="right">0.45</td>
+<td align="right">6</td>
+<td align="left">Med</td>
+<td align="right">58302</td>
+</tr>
+<tr class="odd">
+<td align="right">7</td>
+<td align="right">0.61</td>
+<td align="right">1</td>
+<td align="left">High</td>
+<td align="right">93819</td>
+</tr>
+<tr class="even">
+<td align="right">13</td>
+<td align="right">0.26</td>
+<td align="right">10</td>
+<td align="left">Med</td>
+<td align="right">54839</td>
+</tr>
+<tr class="odd">
+<td align="right">13</td>
+<td align="right">0.34</td>
+<td align="right">3</td>
+<td align="left">High</td>
+<td align="right">63857</td>
+</tr>
+<tr class="even">
+<td align="right">10</td>
+<td align="right">0.18</td>
+<td align="right">7</td>
+<td align="left">Med</td>
+<td align="right">53502</td>
+</tr>
+<tr class="odd">
+<td align="right">39</td>
+<td align="right">0.27</td>
+<td align="right">7</td>
+<td align="left">Low</td>
+<td align="right">39570</td>
+</tr>
+<tr class="even">
+<td align="right">28</td>
+<td align="right">0.10</td>
+<td align="right">8</td>
+<td align="left">Med</td>
+<td align="right">52457</td>
+</tr>
+</tbody>
+</table>
+<p>For the covariate-constrained randomization, we used the <code>cvcrand()</code> function to randomize 8 out of the 16 counties into the practice-based. For the definition of the whole randomization space, if the total number of all possible schemes is smaller than <code>50,000</code>, we enumerate all the schemes as the whole randomization space. Otherwise, we simulate <code>50,000</code> schemes and choose the unique shemes among them as the whole randomization space. We calculate the balance scores of <code>&quot;l2&quot;</code> metric on three continuous covariates as well as two categorical covariates of location and income category. Location has <code>&quot;Rural&quot;</code> and <code>&quot;Urban&quot;</code>. The level of <code>&quot;Rural&quot;</code> was then dropped in <code>cvcrand()</code>. As income category has three levels of <code>&quot;low&quot;</code>, <code>&quot;med&quot;</code>, and <code>&quot;high&quot;</code>, the level of <code>&quot;high&quot;</code> was dropped to create dummy variables according to the alphanumerical order as well. Then we constrained the randomization space to the schemes with <code>&quot;l2&quot;</code> balance scores less than the <code>0.1</code> quantile of that in the whole randomization space. Finally, a randomization scheme is sampled from the constrained space.</p>
 <p>We saved the constrained randomization space in a CSV file in <code>&quot;dickinson_constrained.csv&quot;</code>, the first column of which is an indicator variable of the finally selected scheme (<code>1</code>) or not (<code>0</code>). We also saved the balance scores of the whole randomization space in a CSV file in <code>&quot;dickinson_bscores.csv&quot;</code>, and output a histogram displaying the distribution of all balance scores with a red line indicating our selected cutoff (the <code>0.1</code> quantile).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> Design_result&lt;-<span class="kw">cvcrand</span>(<span class="dt">id =</span> Dickinson_design$county,
-                       <span class="dt">metric =</span> <span class="st">&quot;L2&quot;</span>,
-                       <span class="dt">x =</span> <span class="kw">data.frame</span>(Dickinson_design[, -<span class="dv">1</span>]),
-                       <span class="dt">n =</span> <span class="dv">16</span>,
-                       <span class="dt">ntrt =</span> <span class="dv">8</span>,
-                       <span class="dt">categorical =</span> <span class="kw">c</span>(<span class="st">&quot;location&quot;</span>,<span class="st">&quot;incomecat&quot;</span>),
-                       <span class="dt">savedata =</span> <span class="st">&quot;dickinson_constrained.csv&quot;</span>,
-                       <span class="dt">savebscores =</span> <span class="st">&quot;dickinson_bscores.csv&quot;</span>,
-                       <span class="dt">cutoff =</span> <span class="fl">0.1</span>,
-                       <span class="dt">seed =</span> <span class="dv">12345</span>)</code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> Design_result &lt;-<span class="st"> </span><span class="kw">cvcrand</span>(<span class="dt">clustername =</span> Dickinson_design$county,
+                  <span class="dt">balancemetric =</span> <span class="st">&quot;l2&quot;</span>,
+                  <span class="dt">x =</span> <span class="kw">data.frame</span>(Dickinson_design[ , <span class="kw">c</span>(<span class="st">&quot;location&quot;</span>, <span class="st">&quot;inciis&quot;</span>,
+                      <span class="st">&quot;uptodateonimmunizations&quot;</span>, <span class="st">&quot;hispanic&quot;</span>, <span class="st">&quot;incomecat&quot;</span>)]),
+                  <span class="dt">ntotal_cluster =</span> <span class="dv">16</span>,
+                  <span class="dt">ntrt_cluster =</span> <span class="dv">8</span>,
+                  <span class="dt">categorical =</span> <span class="kw">c</span>(<span class="st">&quot;location&quot;</span>, <span class="st">&quot;incomecat&quot;</span>),
+                  <span class="dt">savedata =</span> <span class="st">&quot;dickinson_constrained.csv&quot;</span>,
+                  <span class="dt">savebscores =</span> <span class="st">&quot;dickinson_bscores.csv&quot;</span>,
+                  <span class="dt">cutoff =</span> <span class="fl">0.1</span>,
+                  <span class="dt">seed =</span> <span class="dv">12345</span>)</code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqAAAAGACAMAAABFpiBcAAAAvVBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZpAAZrY6AAA6ADo6AGY6OgA6OmY6OpA6ZpA6ZrY6kLY6kNtmAABmADpmOgBmOjpmkJBmkLZmkNtmtrZmtttmtv+QOgCQZgCQZjqQkGaQkLaQtpCQttuQtv+Q29uQ2/+2ZgC2Zjq2ZpC2kGa225C227a229u22/+2/7a2///bkDrbkGbbtmbbtpDb27bb29vb/7bb////AAD/tmb/25D/27b//7b//9v////FSI0PAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAWHElEQVR4nO2di3rjxnlAofWq0tauXdFO2kSK07gRnbbeLG2nlaml+P6PVcwVA2AwxJAY8gd4zvfZSxKYf3A5mhsuU+0BBFNdegMAUiAoiAZBQTQICqJBUBANgoJoEBREcxZB356q2xfz753/Eiz+26epM/zxvqq+0R/X1btI9P5GzBe9L50dWttvn39XVdVXH/XH76vq5uv6121luXlWR6r+998OHIqNXvUyCBD083cxhU5Cn4MH/fEaBVXW6W/be2/iq/lYH4xQ0DqZ4i6dw3UJ2iOu0EkER/QKBf31u8oIWv/47lmpWX9ZV9Uf9z+7P1t1iNS5qA/UD+rXx2QO1yWo/fLzl6rG+agMMn/Y+1/r6ugLU9uoIuD9s3arPjh/+a5699Ec9q/qA7VbVXe/flnd1Mf7vl6rycYHWLtiY68F/Z/69691Nedj2I3w31U2f9WZ6kS/1Bv3xR/dltx807jsN7u1VrDtfnuDlGGi1maEQXzC8EAEKQeDdAWt1bvRTu53v7u/M4fgk1muDp1ZyVhrSoyw3IjuX+vg+P2KnIfEPh/LpQTdVK7GcYLaX+xfvjLsy+bn25etr5bqA2P40qltaAK0BfU57ZsYZiOa7y6xSWXTPOxdXu8/tfPQmTZrhdvutjdIGSZSBNkGQVzCfjCdcjhIX9D3P7UqiJiga519/f1h37RYh/bPHRz1c7Nf/fOQ2OejOZegDiuoOlIv+1/07ptK2PxJb/Qv9cG/e3lbO29vP+7/t071Ty9qpQd9GB5U2rrO2jR1VhigVcWr9L/YnF0Md1Ldd5Xu/ccm+399+bwyfz11kWbWUISbHazVzlpvb5AyTGSPhs82COISBsGClIkgXUF//qbdIvUB9eF6dL/dmX+MoFakgf0zm7ZxZ+vj0HkY3ufjuZCg9V68/8kuNYdn7f5sjRbm79EcHNdA+sd/fakC1L+bwuD2JXCnFaAlqC2pzDmwMfwZtN9tNua8mXU3X//kSpiNO4H9zVZrdbLW2xukDBM5XLZBELejQbAgZSJIpBcfflMeqcA/6gL331tHpSvowP6ZTdO7FOxX7zwc2OfjuJCg5hfT0NJHwh1SpZb73HLt7XsXwNRT5v+NoGGASCdJ/9LEMGs3320KHTQ4u7br69sLwWYHa8WyDlKG+7pv70ookk3YORBBdskgg4LWZWDQbKq+1j+7qr4raHz/woMT7FfvPKT2+Wgu1Qb9/J3Zlf+0h8cdsrpieXSfQ0HVHr//j3+sBgUNA7QFbZ1vG8P/ldjvHUFdn6E1ZKhoNjtYK5Z1mDLY1317V8LuiU3YChakTAYZFlRJ4zr0dUfzPgi+7wsa37/w4AT71TsPiX0+nsuNg37+s2pc6y7NiBLUHMrdsKAjStAghmtnuO/DJWh3AMZt9uES9LGfyAV96GcVK0HbKZNBBgR1fnZUdEb2OknR/euUoG6/YiXo0D4fz0UH6t/+1LQ4h9ugrkR63DcN8L6gw21QfdTUz0EMvRHB9/Ac2Ejbr34Ier2t3Qk2W60Vy7qX0iTat3clDOK2ueNQmDIeJCHoblU1pjaC+o2zLZ3O8HRv/4KDE+xX7zwk9vl4LiSo7iKqekD3L+2VjoFevCuRbl8+Pw23QRO9+He2Fx/EcCWo+94StM5ed4RrBdZqmO/zyp38cLODtWJZNynDRPv2roRBXMIgWJAyESQh6NoXYfWe1eF/NeOjzVHb6GFM3w8d2L/2X6/br/55GN7n47lUCfpj07ZTTZfUOKhvgyY7SZ3ByFBQjWlGdDsW7nvrHLg0d35kz0cLNjtYK5Z1kDJM1N6VMIjf5iBYkHI4yLCgvtfSXODstD/eOpc64/sXHpxmv/rnYXifj+diVby6TGFuY9CXjdwFFDMMon76l4+9Xvz7H+zwRlTQIEC7DeqvJDUxml68+d4W1FxD0ZE+f3/vLkPt3RJ790WwVizrIGWYqLUZYZBmm4MDEaQcDDIsqBtg1znp+0bM9myboTt1W014s0h0/1oHx+9X5DwM7/PRSL7dbn16BQFzR6Sga32vnL3aAVeNSEHdgNrl7qEBKYgUtG4v3U9zLwzMHZmCAlgQFERzvKAVwMRMK+jRKX87OiUsGgQF0SAoiAZBQTQICqJBUBANgoJoEBREg6AgGgQF0QgUNHmVC64MiYKeHg0WA4KCaBAURIOgIBoEBdEgKIgGQUE0CAqiQVAQDYKCaBAURIOgIBoEBdEgKIgGQUE0CAqiQVAQDYKCaBAURIOgIJosQd1EPINThSEoTEyOoBs3/9B2aMpvBIWJyRD07amZwG1gsiIEhYnJEHS38vPWbgcqeQSFiaEEBdHktUH9BLi0QeE8ZPXi7cy1w9NlTiwoL8GBeYyDIujVgqAgmnkM1CPo1TKPgXoEvVrmMcwU6TcdnRPMikkG6ifQZqygB7YRlsbcStDTc4JZMY+BegS9WkQP1Cd+QtArYWbjoAh6bSAoiCZL0HVV3enB+seBFYoJ2hsmQNArIauTVLc919WdaovSSYLzkDvMtL153jPMBGcjd6DeDNGf+456BL1a5JSgqXYmgl4tR7VBg2tK41Ie5rekhAh6tcjpxSMoRJAzDoqgEGH+gnIH3qJZgKCnZw5yQVAQDYKCaBAURIOgIBoEBdEgKIgGQUE0lxbUDbL/FrlHBEHh8oLaf6coQbmktECWJOjxWwFiQVAQDYKCaGYraOIGfARdELMVdNQymD0ICqJBUBANgoJoEBREg6AgGgQF0SAoiAZBQTQICqJBUBANgoJoEBREg6AgGgQF0WQJWmA6bgSFJDmClpiOG0EhSYagRSaTRVBIkiHo8HTch1KOyB9BIQolKIgmrw06/XTcCApJsnrxBabjRlBIsshxUF6CsxwWKegJ2wPCWPZAPYLOnmUP1CPo7Fn2MBOCzp5JBupP6JQgKCShBAXRJATdrdTU2wHzG6hH0NmTLEE3daUdqji7gXoEnT2Hqviuo/nRxqVAUIhyuA26SQ18jog2LgWCQpQDgm5rOx/r7pGp1Ne1qK/3VXXznBFtXP4IClFSgqompzHTDCtpPz88twacDkcblz+CQpRkL75dUu5WdWN0rTv2DDPBmcgcqLdjoXO5ox5BZ09S0HVdUAZjnqr03FCCwjlJCbrWGu5Wbrh+t3r3SReh26FeEoLCxCTboKYrFNTnWzNQfxdJNBhtXP4IClESgrpr75uxo6AICpOTquLNtffXe64kwcVIdpLUoPzwqPzIaONSIChEyRhmOjLauBQIClEQFESTEvTgM3Kjoo1LgaAQJTkOOt7MRLRxKRAUoiTHQcd33xPRxqVAUIgyYqD+xGjjUhQSlFeMzJ3kQP3gFaOcaONSFC5BEXSupNqg2yq3CEVQmJhkFV8tphePoHPlSsZBEXSuICiIJiloXcnfvqwzBpsQFCYm2Um6ed7cvuQMhyIoTExymOlBP9uxhPtBEXSuJHvxj1rQoSfkRkYblwJBIcqIEnQ9+CqmUdHGpUBQiHK4DbrJGK5HUJiYQ734hdxRj6BzhXFQEM21CcocSjMj2Ytf4LX4yDKQzOESNGOUCUFhakZU8evxt4UiKEzMCEEXNVCPoDNjhKCLutSJoDPjsKDN2+2OizYuBYJClBG9+PFXOgUL2h9cQtBZMKKKPzHauBSUoBAlS9D5TseNoHNlRBXvlZzxdNwIOldSJah57NjfzTTnyWQRdK4kBH17MmY6G4en405GG5c/gkKUVBX/rbnRztlICQrnZ0QJ6u+on/F03Ag6V5JtUH2v8qa5Y3m+03Ej6FxJDjNpITPG6REUpiYp6CTRxqW4gKDcuTwHsgRd5kA9gkrmUBUfvvpmoQP1CCqZA52k8NU3Sx1mQlDJJIeZ2q++GR6oP6E5h6CQJCFo99U3lKBwfkaUoEsfqEdQyRxugwavvlnmQD2CSuZQL35pr75B0JmRFHSSaONSIChEOdAGjfF6P/i6u9HnutfvR1CIcqAXH9K7w35ctPSKCApJkp2kjoa28z5JCdr9gKAQJVmCdovL3Ur13xEUzkdmJ2ld9+kRFM5Hbi9+Uz0gKJyPIUEH5+J+vf8CQeFsJAWNDjS9PQ3PqoCgMDH5guZGS6+IoJAEQRFUNAiKoKJBUAQVDYIiqGiGBT144X1ktPSKCApJhgSdLlp6RQSFJAiKoKJBUAQVDYIiqGgQFEFFg6AIKhoE5TV3okFQilLRIGisKEVVMSBochlcGgRFUNEgKIKKBkERVDQIiqCiQVAEFQ2CIqhoEBRBRYOgCCoaBI0u45KSFM4qaORaolBB+z/BZTivoP1PCApJEBRBRYOgCCoaBEVQ0WQJeup03AgKueQIevJ03AgKuWQIevpksggKuWQIOjwd96GU/cWzEZQR+wtDCZq7DM5KXhv0xOm4ERRyyRH05Om4ERRyyRL0qGjRxQgK40BQBBVNlqBXPFCPoBcir5N0vQP1CHohMgS97mEmRkQvQ4agwwP1Y0/enAXtL4NzQAmKoKLJa4MyUI+gZyZHUAbq25/gDGQJelS06GIEhXEgKIKKJkvQTV2962bo5mput0ssg3OQ1Um6ea6boXf7Kxe0zx6KkSGoGWZ6e6q7SFctaGIZTE6GoG6gfn37gqDxZTA52SVozfoOQePLYHKy2qBWy91q6H4mBIWJyRHUX0p6e0JQBD0PWYIeFS26GEFhHAiKoKJBUAQVDYIiqGgQFEFFg6AIKhoERVDRICiCigZBEVQ0CIqgokFQBBUNgk6wjFuXy4GgRZbBVCBomWWUqROBoFT/okFQqn/RICiCigZBJ102ON04gh4JglKCigZBEVQ0CIqgokFQBBUNgp5tGe90OgYElbAMBkFQCctgEASVsAwGQVAJy2CQcwga6RUg6H4f6zbhbJezCNpfjKAHloEFQWUuAwuCCl1GrW9A0Nksu04QVNaySH/yuntSCDrnZVcAgs552RWAoHNedgUg6AyXXVNrFEGXsWyxyiLorJf1H9JbmqoIuthlKXnnY3GWoG9PZq8GpvFC0PkuE0uOoJvKTta5dR/GpURQ+cuSXLLAzRDUTyZbq3r7Mjoagl56WeTqVGpZavV9j9LyZgjqpuOu2bYr+QMbGWv7dPltzEqwaE4V9OgSdAy/HZ0SFk1eG9QWoZlt0DEgKETJEVRNFK8ZKD8RFCYnS9Cjoo0DQSEKgoJoEBREg6AgGgQF0SAoiAZBQTQTCwowMZMKOqDtxPHOGH2+wZe86Qi6gOBL3nQEXUDwJW86gi4g+JI3HUEXEHzJm46gCwi+5E1H0AUEX/KmI+gCgi950xF0AcGXvOllcwc4EQQF0SAoiAZBQTQICqJBUBANgoJoEBREg6AgGgQF0SAoiAZBQTQICqKZVNBtVd08TxnQoWd0eCiYxVq/ZbJE8Nf7qrrbFwq+39TH5bFI9Nd//tSKO20GJvqY0zqloNs6j20Jfd6e6qgbdZ4LZbHVr0EtEXxbB96tSm35RgVVhk4efbfSb373cafNwEQfdVonFNS8Nnx9N11Ex+u9KiU27z4VymK3UoKWCG5iltryt6c7E3Ty6Fsz/5CPO20GNvqo0zqhoD6/6UK2qP/ECmWxuf1TLWiJ4K8fbLFQZMu9oFNH31YP25ZCk2bgottv6dM6paD6ZGyLCbquj1ORLOqoqg1aIvj23d9XuplVZstdFV8guhHUxZ06gyDSgdM6oaCmEVGkEarD1+e5SBaqglGClgi+UXWZKugKHRzbuSgQXevi406dQSPjodM6G0G3rjE9eRZqnp1igt7YsqHMwalLn7oaLvKHeyZBD57WuVTxZjacElnomKWqeNOuqttYRQ5O00ScaxV/+LTOpJNkpw4tkcXGvvrvsURwc9DrE1Dk4PiSp0D0gp2kvZdxxGmdxTCTn1asWBbrQsNMZkrJbaFhJnNiy0TfFhxmcoKOOa2zGKhXzayyWaxLDdRvnPlFtty1QQtE35YcqHfl84jTOumlzk2hS522FlaxC2VhLnWWCL51V/OKbPm6WHRfCdu402ago486rdwsAqJBUBANgoJoEBREg6AgGgQF0SAoiAZBs1n70TuPuWAEBUDQbOygfmgoghYDQbMxgu5WD81PCFoMBM3GCaqcXJunKvUX//kPK/OopbqUd2f/dTarhzxbC+2l0N23f1b3NoerggJBs7FVvH0cSNf1StDms3pW0f6nyln1r7svQt9/pB7ScAvVZ/XU526looarggZBszGdJPUc6O7bZ+NcLWjw+UF/cG0A86+998LdlOsWmhvNtjfP+ofWqqBB0GzcSx7M7YvbSpeBj+3P9f/MzZrurmL7zT5u7r7af7XOj51VQYOg2RhB9b2YdZPx3X+bErT1WQtqnzjeujv29Tf9Mo1H/ziykVEVwFrQ1qqgQNBsrKDuQQhbxYefIyVoK4B7RiNegkIIgmbjStDbF/Pko6nWw8+2THRt0G6BGCwM2qCPjFbFQNBsXBv00RaY1YMrMN1no5rqkqtH4vWQ/tq+gss9PuEWNr14PfYUrAoaBM0muNSpn1RYm/Iv/Gx8C8dBm+fAm6StcVBTeIarggJBQTQICqJBUBANgoJoEBREg6AgGgQF0SAoiGbegu5W9vaKd3+PXyXsTG9i51YZxdZctRy+/LhxU6gMrKR+bCZaid2lVOLSZjdm5wYUPytO+NIlyXenzFtQhbkxKH6uO29Ncze7jcEFHJQovNY+JGgz0cr+XIJG0RPhKPysOOplnPrI+JlshLJoQTvvndzmXEYcIWizwpCgrTezXlBQ925YPyuO/utS9wL4iUKkshxBf3/fPOzTqlTd2WnPfqKquL98CK6ctx8pUlXh7f8591qPCpmr52oF85JLvWIkd6+fLcNf79VKemHBR5l0TL+6S+0OyIfwPhQEPQtO0OBJIP8EUPfd581Hdbvxtgpu7eg+UuQKRndfkj/J7fuPXAkayd0LunYlqFtY8lEmFdOvvm9tQDArjmZDFX8OnKDhk0DuCaDu7BFeUFu2NoJGHinygrZitu/g3DtBI7m7FbaVs8zVryUfZVK5dp5qap6Q9rPi6M0qOvvpVCxHUCNa67GeYUH95AbhjcKtR4oCQVsx2/fA74M2aHdNH9XWn/aN8jfP7bwmfpTJbE7L0OYA+Flx9Le3JzUBj3uLuFAWJ2g4qjJcxW96gnYfKQoFbcVsPUW07wgarmknUGjakXpr1P9LPsqkf7GrW+wjAM1uu95aucklp2NxgraGPbtHvylBb6wsrYLrdUDQfsxkCWqx3auHdkonRalHmZqWr/s1eAeKrzj8FhWeHvB0liZoa+SmN72JF9Q/YeGafpFHioI2aC9mrw0ayd2Uj92+9Kbwo0z+i/8QDG/t3Kw4fgIb/2HEkb4ISxO0/VhPd3qT5kSYju/Ns2qH1RVi/5Ei5ULYi29i9nrxD/HcdXEYNO50L774o0y6k+RW9wfB4WfF8RND0QYtTUfQ9mM99oKe7bi2mqP1ar//oAZtquoPsUeK1p1x0GD60/Apor1bsbdm/T2YaMWNgz66rSr0KJNvlTY9Izf8EKTzw6/BTDYymb+gJ9AetwaJICiIBkFBNP8PEpnsKGthuv8AAAAASUVORK5CYII=" /><!-- --></p>
 <p>The we had the following output:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the metric the user specified</span>
- Design_result$metric</code></pre></div>
-<pre><code>## [1] &quot;L2&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the selected scheme </span>
- Design_result$Allocation</code></pre></div>
-<pre><code>##       id allocation
-##  [1,]  1          0
-##  [2,]  2          0
-##  [3,]  3          0
-##  [4,]  4          1
-##  [5,]  5          1
-##  [6,]  6          0
-##  [7,]  7          1
-##  [8,]  8          0
-##  [9,]  9          1
-## [10,] 10          1
-## [11,] 11          0
-## [12,] 12          1
-## [13,] 13          1
-## [14,] 14          0
-## [15,] 15          1
-## [16,] 16          0</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the cutoff balance score, the balance score of the selected   scheme, as well as the histogram of the balance scores of the whole randomization space</span>
- Design_result$Bscores</code></pre></div>
-<pre><code>##   CR-Benchmark Selected Point           Mean             SD            Min             5% 
-##       7.638463       6.763833      24.000000      15.774661       1.161107       5.826458 
-##            10%            20%            25%            30%            50%            75% 
-##       7.638463      10.848749      12.221264      13.839891      20.577839      31.620790 
-##            95%            Max 
-##      55.486080     116.656181</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the statement about how many clusters to randomize to the intervention and the control arms respectively</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the balance metric used</span>
+ Design_result$balancemetric</code></pre></div>
+<pre><code>## [1] &quot;l2&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the allocation scheme from constrained randomization</span>
+ Design_result$allocation</code></pre></div>
+<pre><code>##    clustername allocation
+## 1            1          0
+## 2            2          0
+## 3            3          0
+## 4            4          1
+## 5            5          1
+## 6            6          0
+## 7            7          1
+## 8            8          0
+## 9            9          1
+## 10          10          1
+## 11          11          0
+## 12          12          1
+## 13          13          1
+## 14          14          0
+## 15          15          1
+## 16          16          0</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the histogram of the balance score with respect to the balance metric</span>
+ Design_result$bscores</code></pre></div>
+<pre><code>##                                   
+## 1  score (selected scheme)   6.764
+## 2             cutoff score   7.638
+## 3                     Mean  24.000
+## 4                       SD  15.775
+## 5                      Min   1.161
+## 6                       5%   5.826
+## 7                      10%   7.638
+## 8                      20%  10.849
+## 9                      25%  12.221
+## 10                     30%  13.840
+## 11                     50%  20.578
+## 12                     75%  31.621
+## 13                     95%  55.486
+## 14                     Max 116.656</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the statement about how many clusters to be randomized to the intervention and the control arms respectively</span>
  Design_result$assignment_message</code></pre></div>
 <pre><code>## [1] &quot;You have indicated that you want to assign 8 clusters to treatment and 8 to control&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the statement about how to get the whole space of schemes</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the statement about how to get the whole randomization space to use in constrained randomization</span>
  Design_result$scheme_message</code></pre></div>
 <pre><code>## [1] &quot;Enumerating all the 12870 schemes for 8 clusters in the treatment arm out of 16 clusters in total&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the statement about the benchmark of the constrained space</span>
- Design_result$BLcut_message</code></pre></div>
-<pre><code>## [1] &quot;By cutoff quantile of 0.1 of L2 , the BL constrained randomization benchmark is 7.638&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the statement about the cutoff in the constrained space</span>
+ Design_result$cutoff_message</code></pre></div>
+<pre><code>## [1] &quot;The quantile cutoff value is 0.1 based on the l2 balance metric, the cutoff balance score is 7.638&quot;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the statement about the selected scheme from constrained randomization</span>
- Design_result$BLchoice_message</code></pre></div>
-<pre><code>## [1] &quot;Balance score of selected scheme by L2 has B score of 6.764&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the matrix containing allocation scheme, the id as well as the original covariates' matrix</span>
- Design_result$data_BL</code></pre></div>
-<pre><code>##    inter id location inciis uptodateonimmunizations hispanic incomecat
-## 1      0  1    Rural     94                      37       44       Low
-## 2      0  2    Rural     85                      39       23      High
-## 3      0  3    Rural     85                      42       12       Low
-## 4      1  4    Rural     93                      39       18      High
-## 5      1  5    Rural     82                      31        6      High
-## 6      0  6    Rural     80                      27       15       Med
-## 7      1  7    Rural     94                      49       38       Low
-## 8      0  8    Rural    100                      37       39       Low
-## 9      1  9    Urban     93                      51       35       Med
-## 10     1 10    Urban     89                      51       17       Med
-## 11     0 11    Urban     83                      54        7      High
-## 12     1 12    Urban     70                      29       13       Med
-## 13     1 13    Urban     93                      50       13      High
-## 14     0 14    Urban     85                      36       10       Med
-## 15     1 15    Urban     82                      38       39       Low
-## 16     0 16    Urban     84                      43       28       Med</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the descriptive statistics for all the variables in the original covariates' matrix in the two arms from constrained randomization</span>
- Design_result$BL_result</code></pre></div>
-<pre><code>##                                      Stratified by inter
-##                                       0             1             p      test
-##   n                                       8             8                    
-##   location = Urban (%)                    3 (37.5)      5 (62.5)   0.617     
-##   inciis (mean (sd))                  87.00 (6.59)  87.00 (8.45)   1.000     
-##   uptodateonimmunizations (mean (sd)) 39.38 (7.65)  42.25 (9.18)   0.507     
-##   hispanic (mean (sd))                22.25 (13.77) 22.38 (12.94)  0.985     
-##   incomecat (%)                                                    0.819     
-##      High                                 2 (25.0)      3 (37.5)             
-##      Low                                  3 (37.5)      2 (25.0)             
-##      Med                                  3 (37.5)      3 (37.5)</code></pre>
-<p>From the output of <code>Design_result$BL_result</code>, the selected scheme is able to properly balance the baseline values of the covariates. And the selected scheme is shown in <code>Design_result$Allocation</code>.</p>
+ Design_result$choice_message</code></pre></div>
+<pre><code>## [1] &quot;Balance score of selected scheme by l2 is 6.764&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the data frame containing the allocation scheme, the clustername as well as the original data frame of covariates</span>
+ Design_result$data_CR</code></pre></div>
+<pre><code>##    arm clustername location inciis uptodateonimmunizations hispanic incomecat
+## 1    0           1    Rural     94                      37       44       Low
+## 2    0           2    Rural     85                      39       23      High
+## 3    0           3    Rural     85                      42       12       Low
+## 4    1           4    Rural     93                      39       18      High
+## 5    1           5    Rural     82                      31        6      High
+## 6    0           6    Rural     80                      27       15       Med
+## 7    1           7    Rural     94                      49       38       Low
+## 8    0           8    Rural    100                      37       39       Low
+## 9    1           9    Urban     93                      51       35       Med
+## 10   1          10    Urban     89                      51       17       Med
+## 11   0          11    Urban     83                      54        7      High
+## 12   1          12    Urban     70                      29       13       Med
+## 13   1          13    Urban     93                      50       13      High
+## 14   0          14    Urban     85                      36       10       Med
+## 15   1          15    Urban     82                      38       39       Low
+## 16   0          16    Urban     84                      43       28       Med</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> <span class="co"># the descriptive statistics for all the variables by the two arms from the selected scheme</span>
+ Design_result$baseline_table</code></pre></div>
+<pre><code>##                                           arm = 0       arm = 1
+## n                                               8             8
+## location = Urban (%)                    3 (37.5)      5 (62.5) 
+## inciis (mean (sd))                   87.00 (6.59)  87.00 (8.45)
+## uptodateonimmunizations (mean (sd))  39.38 (7.65)  42.25 (9.18)
+## hispanic (mean (sd))                22.25 (13.77) 22.38 (12.94)
+## incomecat (%)                                                  
+##    High                                 2 (25.0)      3 (37.5) 
+##    Low                                  3 (37.5)      2 (25.0) 
+##    Med                                  3 (37.5)      3 (37.5)</code></pre>
+<p>From the output of <code>Design_result$baseline_table</code>, the selected scheme is able to properly balance the baseline values of the covariates. The selected scheme is shown in <code>Design_result$allocation</code>.</p>
+</div>
+<div id="cvcrand-example-for-stratified-constrained-randomization" class="section level2">
+<h2><code>cvcrand()</code> example for stratified constrained randomization</h2>
+<p>User-defined weights can be used to induce stratification on one or more categorical variables. In the study presented by <span class="citation">(L. M. Dickinson et al. 2015)</span>, there are 8 <code>&quot;Urban&quot;</code> and 8 <code>&quot;Rural&quot;</code> counties. A user-defined weight of <code>1,000</code> is added to the covariate of <code>location</code>, while these weights for other covariates are all <code>1</code>. Intuitively, a large weight assigned to a covariate sharply penalizes any imbalance of that covariates, therefore including schemes that are optimally balanced with respect to that covariate in the constrained randomization space. In practice, the resulting constrained space approximates the stratified randomization space on that covariate. In our illustrative data example, since half of the counties are located in rural areas, perfect balance is achieved by considering constrained randomization with the large weight for <code>location</code> variable. Alternatively, the option of <code>stratify</code> is able to perform the equivalent stratification on the stratifying variables specified.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Stratification on location, with constrained randomization on other specified covariates</span>
+
+Design_stratified_result1 &lt;-<span class="st"> </span><span class="kw">cvcrand</span>(<span class="dt">clustername =</span> Dickinson_design$county,
+                                     <span class="dt">balancemetric =</span> <span class="st">&quot;l2&quot;</span>,
+                                     <span class="dt">x =</span> <span class="kw">data.frame</span>(Dickinson_design[ , <span class="kw">c</span>(<span class="st">&quot;location&quot;</span>, <span class="st">&quot;inciis&quot;</span>, 
+                                                                          <span class="st">&quot;uptodateonimmunizations&quot;</span>, 
+                                                                          <span class="st">&quot;hispanic&quot;</span>, <span class="st">&quot;incomecat&quot;</span>)]),
+                                     <span class="dt">ntotal_cluster =</span> <span class="dv">16</span>,
+                                     <span class="dt">ntrt_cluster =</span> <span class="dv">8</span>,
+                                     <span class="dt">categorical =</span> <span class="kw">c</span>(<span class="st">&quot;location&quot;</span>, <span class="st">&quot;incomecat&quot;</span>),
+                                     <span class="dt">weights =</span> <span class="kw">c</span>(<span class="dv">1000</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>),
+                                     <span class="dt">cutoff =</span> <span class="fl">0.1</span>,
+                                     <span class="dt">seed =</span> <span class="dv">12345</span>) </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Design_stratified_result1$baseline_table</code></pre></div>
+<pre><code>##                                           arm = 0       arm = 1
+## n                                               8             8
+## location = Urban (%)                    4 (50.0)      4 (50.0) 
+## inciis (mean (sd))                   88.12 (9.46)  85.88 (4.73)
+## uptodateonimmunizations (mean (sd))  42.38 (9.96)  39.25 (6.54)
+## hispanic (mean (sd))                24.88 (15.67)  19.75 (9.82)
+## incomecat (%)                                                  
+##    High                                 2 (25.0)      3 (37.5) 
+##    Low                                  3 (37.5)      2 (25.0) 
+##    Med                                  3 (37.5)      3 (37.5)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># An alternative and equivalent way to stratify on location</span>
+
+Design_stratified_result2 &lt;-<span class="st"> </span><span class="kw">cvcrand</span>(<span class="dt">clustername =</span> Dickinson_design$county,
+                                     <span class="dt">balancemetric =</span> <span class="st">&quot;l2&quot;</span>,
+                                     <span class="dt">x =</span> <span class="kw">data.frame</span>(Dickinson_design[ , <span class="kw">c</span>(<span class="st">&quot;location&quot;</span>, <span class="st">&quot;inciis&quot;</span>,
+                                                                          <span class="st">&quot;uptodateonimmunizations&quot;</span>, 
+                                                                          <span class="st">&quot;hispanic&quot;</span>, <span class="st">&quot;incomecat&quot;</span>)]),
+                                     <span class="dt">ntotal_cluster =</span> <span class="dv">16</span>,
+                                     <span class="dt">ntrt_cluster =</span> <span class="dv">8</span>,
+                                     <span class="dt">categorical =</span> <span class="kw">c</span>(<span class="st">&quot;location&quot;</span>, <span class="st">&quot;incomecat&quot;</span>),
+                                     <span class="dt">stratify =</span> <span class="st">&quot;location&quot;</span>,
+                                     <span class="dt">cutoff =</span> <span class="fl">0.1</span>,
+                                     <span class="dt">seed =</span> <span class="dv">12345</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Design_stratified_result2$baseline_table</code></pre></div>
+<pre><code>##                                           arm = 0       arm = 1
+## n                                               8             8
+## location = Urban (%)                    4 (50.0)      4 (50.0) 
+## inciis (mean (sd))                   88.12 (9.46)  85.88 (4.73)
+## uptodateonimmunizations (mean (sd))  42.38 (9.96)  39.25 (6.54)
+## hispanic (mean (sd))                24.88 (15.67)  19.75 (9.82)
+## incomecat (%)                                                  
+##    High                                 2 (25.0)      3 (37.5) 
+##    Low                                  3 (37.5)      2 (25.0) 
+##    Med                                  3 (37.5)      3 (37.5)</code></pre>
+<p>The results from <code>Design_stratified_result1$baseline_table</code> and <code>Design_stratified_result2$baseline_table</code> are the same. The final selected scheme from cvcrand() now has 4 <code>&quot;Urban&quot;</code> counties in both arms. The <code>location</code> covariate has been stratified for the randomization for the randomization through the <code>weights</code> or <code>stratify</code> argument in the <code>cvcrand()</code> function.</p>
 </div>
 <div id="analysis-clustered-permutation-test" class="section level2">
 <h2>Analysis: Clustered Permutation Test</h2>
-<p>At the end of cluster randomized trials, individual outcomes are collected. Permutation test based on <span class="citation">(Gail et al. 1996)</span> and <span class="citation">(Li et al. 2016)</span> is then applied to the continuous or binary outcome with some individual-level covariates.</p>
+<p>At the end of cluster randomized trials, individual outcomes are collected. Permutation test based on <span class="citation">(Gail et al. 1996)</span> and <span class="citation">(Fan Li et al. 2016)</span> is then applied to the continuous or binary outcome with some individual-level covariates.</p>
+<p>The permutation test is implemented in a two-step procedure. In the first step, an outcome regression model is fitted for response <span class="math inline">\(Y_{ij}\)</span> with covariates <span class="math inline">\(\textbf{z}_{ij}\)</span>. This is done by fitting a linear regression model for continuous responses and a logistic regression model for binary responses <span class="citation">(Gail et al. 1996)</span>, ignoring the clustering of responses. The individual residual <span class="math inline">\(r_{ij}=Y_{ij}-\hat{Y}_{ij}\)</span> can be calculated from the predicted response for each individual by <span class="math inline">\(\hat{Y}_{ij}\)</span>. In the second step, cluster-specific residual means are obtained as <span class="math inline">\(\bar{r}_{i\cdot}=\sum_{j=1}^{m_i}r_{ij}/m_i\)</span>. The observed test statistic is then computed as <span class="math inline">\(U=\frac{1}{n_T}\sum_{i=1}^nW_i\bar{r}_{i\cdot}- \frac{1}{n_C}\sum_{i=1}^n(1-W_i)\bar{r}_{i\cdot}\)</span>, where <span class="math inline">\(W_i=1\)</span> if the <span class="math inline">\(i\)</span>th cluster is assigned to the treatment arm and <span class="math inline">\(W_i=0\)</span> otherwise, and <span class="math inline">\(n_T=\sum_{i=1}^nW_i\)</span>, <span class="math inline">\(n_C=\sum_{i=1}^n(1-W_i)\)</span> are the number of treated and control clusters.</p>
+<p>Suppose there are <span class="math inline">\(S\)</span> randomization schemes in the constrained randomization space. To obtain the permutation distribution of the test statistic, we permute the labels of the treatment indicator according to the constrained randomization space, and compute a value of <span class="math inline">\(U_s\)</span> (<span class="math inline">\(s=1,\ldots,S\)</span>). The collection of these values <span class="math inline">\(\{U_s:s=1,\ldots,S\}\)</span> forms the null distribution of the permutation test statistic. The p-value is then computed by <span class="math inline">\(\text{p-value}=\frac{1}{S}\sum_{s=1}^S \mathbb{I}(|U_s|\geq |U|)\)</span>.</p>
 <p>The <code>cptest()</code> function in the <code>cvcrand</code> package is used to perform the permutation test for the intervention effect of cluster randomized trials.</p>
-<p>Each categorical variable is transformed into dummy variables to fit in the linear model or logistic regression for the permutation test. Specifically, the level of each categorical variable dropped when it is transformed into several dummiy variables is the first level in the alphanumerical order. If the user wants to specify a different level of each categorical variable to drop, they might create dummy variables themselves before running the <code>cptest()</code> function. Then, the user needs to specify the dummy variables created themselves to be <code>&quot;categorical&quot;</code> when running <code>cptest()</code>.</p>
+<p>Each categorical variable is transformed into dummy variables to fit in the linear model or logistic regression for the permutation test. When transforming a categorical variable to dummy variables, the reference level will be dropped if the categorical variable is specified as a factor. Otherwise, the first level in the alphanumerical order will be dropped. Users can also specify a certain reference level for each categorical variable by manually coding dummy variables before running the <code>cptest()</code> function.</p>
 </div>
 <div id="cptest-example" class="section level2">
 <h2><code>cptest()</code> example</h2>
-<p>Suppose that the researchers were able to assess 300 children in each cluster of the study 1 in <span class="citation">(L. M. Dickinson et al. 2015)</span>, and the cluster randomized trial is processed with the selected randomization scheme from the example above of the <code>cvcrand()</code> function. We expanded the values of the cluster-level covariates on the covariates’ values of the individuals, according to which cluster they belong to. The correlated individual outcome of up-to-date on immunizations (<code>1</code>) or not (<code>0</code>) is then simulated using a generalized linear mixed model (GLMM) to induce correlation by include a random effect. The intracluster correlation (ICC) was set to be 0.01, using the latent response definition provided in <span class="citation">(Eldridge, Ukoumunne, and Carlin 2009)</span>. This is a reasonable value of the ICC the population health studies <span class="citation">(Hannan et al. 1994)</span>. We simulated one data set, with the outcome data dependent on the county-level covariates used in the constrained randomization design and a positive treatment effect so that the practice-based intervention increases up-to-date immunization rates more than the community-based intervention. For each individual child, the outcome is equal to <code>1</code> if he or she is up-to-date on immunizations and <code>0</code> otherwise.</p>
+<p>Suppose that the researchers were able to assess 300 children in each cluster in a study presented by <span class="citation">(L. M. Dickinson et al. 2015)</span>, and the cluster randomized trial is processed with the selected randomization scheme from the example above of the <code>cvcrand()</code> function. We expanded the values of the cluster-level covariates on the covariates’ values of the individuals, according to which cluster they belong to. The correlated individual outcome of up-to-date on immunizations (<code>1</code>) or not (<code>0</code>) is then simulated using a generalized linear mixed model (GLMM) with a logistic link to induce correlation by including a random effect at the county level. The intracluster correlation (ICC) was set to be 0.01, using the latent response definition provided in <span class="citation">(Eldridge, Ukoumunne, and Carlin 2009)</span>. This is a reasonable value for population health studies <span class="citation">(Hannan et al. 1994)</span>. We simulated one data set, with the outcome data dependent on the county-level covariates used in the constrained randomization design and a positive treatment effect so that the practice-based intervention increases up-to-date immunization rates more than the community-based intervention. For each individual child, the outcome is equal to <code>1</code> if he or she is up-to-date on immunizations and <code>0</code> otherwise.</p>
 <table>
 <thead>
 <tr class="header">
@@ -443,10 +630,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </table>
 <p>We used the <code>cptest()</code> function to process the clustered permutation test on the binary outcome of the status of up-to-date on immunizations. We input the file about the constrained space with the first column indicating the final scheme. The permutation test is on the continuous covariates of <code>&quot;inciis&quot;</code>, <code>&quot;uptodateonimmunizations&quot;</code>, <code>&quot;hispanic&quot;</code>, as well as categorical variables of <code>&quot;location&quot;</code> and <code>&quot;incomecat&quot;</code>. Location has <code>&quot;Rural&quot;</code> and <code>&quot;Urban&quot;</code>. The level of <code>&quot;Rural&quot;</code> was then dropped in <code>cptest()</code>. As income category has three levels of <code>&quot;low&quot;</code>, <code>&quot;med&quot;</code>, and <code>&quot;high&quot;</code>, the level of <code>&quot;high&quot;</code> was dropped to create dummy variables according to the alphanumerical order as well.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> Analysis_result &lt;-<span class="st"> </span><span class="kw">cptest</span>(<span class="dt">outcome =</span> Dickinson_outcome$outcome,
-                           <span class="dt">id =</span> Dickinson_outcome$county,
-                           <span class="dt">x =</span> <span class="kw">data.frame</span>(Dickinson_outcome[, <span class="kw">c</span>(-<span class="dv">1</span>, -<span class="dv">7</span>)]),
-                           <span class="dt">cspacedatname =</span> <span class="kw">system.file</span>(<span class="st">&quot;dickinson_constrained.csv&quot;</span>, <span class="dt">package=</span><span class="st">&quot;cvcrand&quot;</span>),
-                           <span class="dt">outcometype =</span> <span class="st">&quot;binary&quot;</span>,
+                           <span class="dt">clustername =</span> Dickinson_outcome$county,
+                           <span class="dt">z =</span> <span class="kw">data.frame</span>(Dickinson_outcome[ , <span class="kw">c</span>(<span class="st">&quot;location&quot;</span>, <span class="st">&quot;inciis&quot;</span>,
+                               <span class="st">&quot;uptodateonimmunizations&quot;</span>, <span class="st">&quot;hispanic&quot;</span>, <span class="st">&quot;incomecat&quot;</span>)]), 
+                            <span class="dt">cspacedatname =</span> <span class="kw">system.file</span>(<span class="st">&quot;dickinson_constrained.csv&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;cvcrand&quot;</span>),                                 
+                           <span class="dt">outcometype =</span> <span class="st">&quot;binary&quot;</span>,                                                      
                            <span class="dt">categorical =</span> <span class="kw">c</span>(<span class="st">&quot;location&quot;</span>,<span class="st">&quot;incomecat&quot;</span>))</code></pre></div>
 <p>The result of <code>&quot;cptest()&quot;</code> includes the final scheme for the cluster randomized trial, the p-value from the permutation test as well as a statement about that p-value.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"> Analysis_result </code></pre></div>
@@ -473,12 +661,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 ## [1] 0.0497
 ## 
 ## $pvalue_statement
-## [1] &quot;Adjusted permutation test p-value = 0.0497&quot;</code></pre>
+## [1] &quot;Clustered permutation test p-value = 0.0497&quot;</code></pre>
 <p>From the p-value of <code>0.0497</code> in <code>Analysis_result</code>, the probability of up-to-date on immunizations for the practice-based approach (<code>1</code>) is significantly different from that for the population-based approach (<code>0</code>).</p>
 </div>
 <div id="session-information" class="section level1">
 <h1>Session Information</h1>
-<pre><code>## R Under development (unstable) (2017-07-03 r72882)
+<pre><code>## R version 3.4.3 (2017-11-30)
 ## Platform: x86_64-w64-mingw32/x64 (64-bit)
 ## Running under: Windows 10 x64 (build 16299)
 ## 
@@ -493,14 +681,15 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] cvcrand_0.0.1
+## [1] cvcrand_0.0.2
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_0.12.11    lattice_0.20-35 zoo_1.8-0       class_7.3-14    digest_0.6.12   rprojroot_1.2  
-##  [7] MASS_7.3-47     grid_3.5.0      backports_1.1.0 magrittr_1.5    e1071_1.6-8     evaluate_0.10.1
-## [13] survey_3.32-1   highr_0.6       stringi_1.1.5   Matrix_1.2-10   rmarkdown_1.8   splines_3.5.0  
-## [19] tools_3.5.0     stringr_1.2.0   survival_2.41-3 yaml_2.1.14     compiler_3.5.0  htmltools_0.3.6
-## [25] knitr_1.17      tableone_0.8.1</code></pre>
+##  [1] Rcpp_0.12.15    survey_3.33-2   knitr_1.20      magrittr_1.5    MASS_7.3-47     splines_3.4.3  
+##  [7] lattice_0.20-35 rlang_0.2.0     stringr_1.3.0   highr_0.6       tools_3.4.3     grid_3.4.3     
+## [13] e1071_1.6-8     class_7.3-14    htmltools_0.3.6 yaml_2.1.17     survival_2.41-3 rprojroot_1.3-2
+## [19] digest_0.6.15   tibble_1.4.2    Matrix_1.2-12   labelled_1.0.1  evaluate_0.10.1 haven_1.1.1    
+## [25] rmarkdown_1.9   stringi_1.1.6   compiler_3.4.3  pillar_1.2.1    forcats_0.3.0   backports_1.1.2
+## [31] tableone_0.9.2  zoo_1.8-1</code></pre>
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1>References</h1>
@@ -516,6 +705,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 <div id="ref-hannan1994parameters">
 <p>Hannan, Peter J, David M Murray, David R Jacobs Jr, and Paul G McGovern. 1994. “Parameters to Aid in the Design and Analysis of Community Trials: Intraclass Correlations from the Minnesota Heart Health Program.” <em>Epidemiology</em>. JSTOR, 88–95.</p>
+</div>
+<div id="ref-li2017evaluation">
+<p>Li, F, EL Turner, PJ Heagerty, DM Murray, WM Vollmer, and ER DeLong. 2017. “An Evaluation of Constrained Randomization for the Design and Analysis of Group-Randomized Trials with Binary Outcomes.” <em>Statistics in Medicine</em> 36 (24): 3791.</p>
 </div>
 <div id="ref-li2016evaluation">
 <p>Li, Fan, Yuliya Lokhnygina, David M Murray, Patrick J Heagerty, and Elizabeth R DeLong. 2016. “An Evaluation of Constrained Randomization for the Design and Analysis of Group-Randomized Trials.” <em>Statistics in Medicine</em> 35 (10). Wiley Online Library: 1565–79.</p>

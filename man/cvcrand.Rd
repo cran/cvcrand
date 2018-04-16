@@ -5,68 +5,71 @@
 \alias{cvcrand}
 \alias{cvcrand}
 \alias{cvcrand-package}
-\title{Constrained randomization for cluster randomized trials}
+\title{Covariate-constrained randomization for cluster randomized trials}
 \usage{
-cvcrand(id = NULL, x, categorical = NULL, weight = NULL, n, ntrt,
-  cutoff = 0.1, numschemes = NULL, size = 50000, seed = NULL,
-  metric = "L2", nosim = FALSE, savedata = NULL, savebscores = NULL)
+cvcrand(clustername = NULL, x, categorical = NULL, weights = NULL,
+  ntotal_cluster, ntrt_cluster, cutoff = 0.1, numschemes = NULL,
+  size = 50000, stratify = NULL, seed = NULL, balancemetric = "l2",
+  nosim = FALSE, savedata = NULL, savebscores = NULL)
 }
 \arguments{
-\item{id}{a vector specifying cluster name}
+\item{clustername}{a vector specifying the identification variable of the cluster. If no cluster identification variable is specified, the default is to label the clusters based on the order in which they appear.}
 
-\item{x}{a data frame specifying the cluster-level covariates to balance}
+\item{x}{a data frame specifying the values of cluster-level covariates to balance. With K covariates and n clusters, it will be dimension of \code{n} by \code{K}.}
 
-\item{categorical}{a vector specifying categorical (including binary) variables. This can be names of the columns or number indexes of columns. Suppose there are \code{K} categories for a categorical variable, \code{cvcrand} function creates \code{K-1} dummy variables and drops the first level based on the alphanumeric order. If the user wants to specify different level to drop for a categorical variable, the user can create \code{K-1} dummy variables as wished to use before running \code{cvcrand}}
+\item{categorical}{a vector specifying categorical (including binary) variables. This can be names of the columns or number indexes of columns, but cannot be both. Suppose there are \code{p} categories for a categorical variable, \code{cvcrand} function creates \code{p-1} dummy variables and drops the reference level if the variable is specified as a factor. Otherwise, the first level in the alphanumerical order will be dropped. The results are sensitive to which level is excluded. If the user wants to specify a different level to drop for a \code{p}-level categorical variable, the user can create \code{p-1} dummy variables and these can instead be supplied as covariates to the \code{cvcrand} function. Then, the user needs to specify the dummy variables created to be \code{categorical} when running \code{cvcrand}. In addition, the user could also set the variable as a factor with the specific reference level. If the \code{weights} option is used, the weights for a categorical variable will be replicated on all the dummy variables created.}
 
-\item{weight}{a vector of user-specified weights for the covariates}
+\item{weights}{a vector of user-specified weights for the covariates to calculate the balance score. The weight for a categorical variable will be replicated for the dummy variables created. Note that the \code{weights} option can be used to conduct stratification on variables. For example, a variable with a relatively large weight like \code{1000} and all other variables with a weight of \code{1} will cause the randomization scheme chosen to be stratified by the variable with the large weight, assuming a low \code{cutoff} value is specified.}
 
-\item{n}{the total number of clusters. It must be a positive integer}
+\item{ntotal_cluster}{the total number of clusters to be randomized. It must be a positive integer and equal to the number of rows of the data.}
 
-\item{ntrt}{the number of clusters in the treatment arm; must be a positive integer less than \code{n}}
+\item{ntrt_cluster}{the number of clusters that the researcher wants to assign to the treatment arm. It must be a positive integer less than the total number of clusters.}
 
-\item{cutoff}{cutoff of distribution of balance scores below which a randomization scheme is sampled. Its default is 0.1, and must be between 0 and 1.}
+\item{cutoff}{quantile cutoff of the distribution of balance score below which a randomization scheme is sampled. Its default is \code{0.1}, and it must be between 0 and 1. The \code{cutoff} option is overriden by the \code{numschemes} option.}
 
-\item{numschemes}{number of schemes to sample. If specified, it overrides cutoff and it must be a positive integer.}
+\item{numschemes}{number of randomization schemes to form the constrained space for the final randomization scheme to be selected. If specified, it overrides the option \code{cutoff} and the program will randomly sample the final randomization scheme from the constrained space of randomization schemes with the \code{numschemes} smallest balance scores. It must be a positive integer.}
 
-\item{size}{number of simulated schemes when simulation is invoked. Its default is 50,000, and must be a positive integer.}
+\item{size}{number of randomization schemes to simulate if the number of all possible randomization schemes is over \code{size}. Its default is \code{50,000}, and must be a positive integer. It can be overriden by the \code{nosim} option.}
 
-\item{seed}{randomization seed. Its default is 12345}
+\item{stratify}{categorical variables on which to stratify the randomization. It overrides the option \code{weights} when specified. This list of categorical variables should be a subset of the \code{categorical} option if specified.}
 
-\item{metric}{balance metric to use. Its choices are "L1" and "L2". The default is "L2"}
+\item{seed}{seed for simulation and random sampling. It is needed so that the randomization can be replicated. Its default is \code{12345}.}
 
-\item{nosim}{If TRUE, it makes the program enumerate all randomization schemes, regardless of number}
+\item{balancemetric}{balance metric to use. Its choices are \code{"l1"} and \code{"l2"}. The default is \code{"l2"}.}
 
-\item{savedata}{the path of the csv file of the constrained randomization space if specified. The first column of the csv data is an indicator variable of the selected randomization scheme. The csv file is needed for clustered permutation test analysis}
+\item{nosim}{if TRUE, it overrides the default procedure of simulating when the number of all possible randomization schemes is over the \code{size}, and the program enumerates all randomization schemes. Note: this may consume a lot of memory and cause R to crash}
 
-\item{savebscores}{the path of the csv file of the vector of balance scores across the entire randomization space if specified. When this option is specified, a histogram is also produced which displays the distribution of all balance scores with a red line on the graph indicating the selected cutoff}
+\item{savedata}{saves the data set of the constrained randomization space in a csv file if specified by string. The first column of the csv file is an indicator variable of the final randomization scheme in the constrained space. The constrained randomization space will be needed for analysis after the cluster randomized trial is completed if the clustered permutation test is used.}
+
+\item{savebscores}{saves the vector of all balance scores across the entire randomization space in a csv file if specified by string. When this option is specified, a histogram is also produced which displays the distribution of all balance scores with a red line on the graph indicating the selected cutoff.}
 }
 \value{
-\code{metric} the metric we use
+\code{balancemetric} the balance metric used
 
-\code{Allocation} the allocation scheme from the constrained randomization
+\code{allocation} the allocation scheme from constrained randomization
 
-\code{Bscores} the histogram of the B score with respect to the metric
+\code{bscores} the histogram of the balance score with respect to the balance metric
 
-\code{assignment_message} the statement about how many clusters to randomize to the intervention and the control arms respectively
+\code{assignment_message} the statement about how many clusters to be randomized to the intervention and the control arms respectively
 
-\code{scheme_message} the statement about how to get the whole randomization space of schemes
+\code{scheme_message} the statement about how to get the whole randomization space to use in constrained randomization
 
-\code{BL_cut_message} the statement about the benchmark of the constrained space
+\code{cutoff_message} the statement about the cutoff in the constrained space
 
-\code{BLchoice_message} the statement about the selected scheme from constrained randomization
+\code{choice_message} the statement about the selected scheme from constrained randomization
 
-\code{data_BL} the data frame containing the allocation scheme, the id as well as the original covariates' matrix or data frame
+\code{data_CR} the data frame containing the allocation scheme, the clustername as well as the original data frame of covariates
 
-\code{BL_result} the descriptive statistics for all the variables in the original covariates' matrix or data frame in the two arms from the selected scheme
+\code{baseline_table} the descriptive statistics for all the variables by the two arms from the selected scheme
 }
 \description{
 cvcrand performs constrained randomization for cluster randomized
-trials (CRTs), especially with a small number of clusters. In constrained randomization,
-a randomized scheme is randomly sampled from a subset of all possible randomization schemes
-based on the value of a balancing criterion proposed by Raab and Butcher (2001) called balance score. And \code{cvcrand} function has two choices of "L1" and "L2" metrics for balance score.
+trials (CRTs), especially suited for CRTs with a small number of clusters. In constrained randomization,
+a randomization scheme is randomly sampled from a subset of all possible randomization schemes
+based on the value of a balancing criterion called a balance score. The \code{cvcrand} function has two choices of "l1" and "l2" metrics for balance score.
 
-\code{cvcrand} function enumerates all randomization schemes or chooses the unique ones among some simulated randomization schemes as specified by the user.
-Some cluster-level "continuous" or "categorical" covariates are then used to calculate the balance scores for the focused schemes. A subset of the randomization schemes is chosen based on user-specified cutoff of certain quantile of balance scores or some fixed number of schemes with the smallest balance scores. \code{cvcrand} function
+The \code{cvcrand} function enumerates all randomization schemes or chooses the unique ones among some simulated randomization schemes as specified by the user.
+Some cluster-level "continuous" or "categorical" covariates are then used to calculate the balance scores for the unique schemes. A subset of the randomization schemes is chosen based on user-specified cutoff of certain quantile of the distribution of the balance scores or based on a fixed number of schemes with the smallest balance scores. The \code{cvcrand} function
 treats the subset as the constrained space of randomization schemes and samples one scheme from the constrained space as the final chosen scheme.
 
 cvcrand: a package for efficient design and analysis of cluster randomized trials
@@ -78,22 +81,85 @@ The cptest function performs permutation test on the outcome of cluster randomiz
 }
 
 \examples{
-Design_result<-cvcrand(id = Dickinson_design$county,
-               metric = "L2",
-               x = data.frame(Dickinson_design[, -1]),
-               n = 16,
-               ntrt = 8,
-               categorical = c("location", "incomecat"),
-               savedata = "dickinson_constrained.csv",
-               savebscores = "dickinson_bscores.csv",
-               cutoff = 0.1,
-               seed = 12345)
+
+# cvcrand example
+
+Design_result <- cvcrand(clustername = Dickinson_design$county,
+                         balancemetric = "l2",
+                         x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+                         ntotal_cluster = 16,
+                         ntrt_cluster = 8,
+                         categorical = c("location", "incomecat"),
+                         savedata = "dickinson_constrained.csv",
+                         savebscores = "dickinson_bscores.csv",
+                         cutoff = 0.1,
+                         seed = 12345)
+
+# cvcrand example with weights specified
+
+Design_result <- cvcrand(clustername = Dickinson_design$county,
+                         balancemetric = "l2",
+                         x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+                         ntotal_cluster = 16,
+                         ntrt_cluster = 8,
+                         categorical = c("location", "incomecat"),
+                         weights = c(1, 1, 1, 1, 1),
+                         cutoff = 0.1,
+                         seed = 12345)
+
+# Stratification on location, with constrained
+# randomization on other specified covariates
+
+ Design_stratified_result <- cvcrand(clustername = Dickinson_design$county,
+                                     balancemetric = "l2",
+                                     x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+                                     ntotal_cluster = 16,
+                                     ntrt_cluster = 8,
+                                     categorical = c("location", "incomecat"),
+                                     weights = c(1000, 1, 1, 1, 1),
+                                     cutoff = 0.1,
+                                     seed = 12345)
+
+ # An alternative and equivalent way to stratify on location
+
+ Design_stratified_result <- cvcrand(clustername = Dickinson_design$county,
+                                     balancemetric = "l2",
+                                     x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+                                     ntotal_cluster = 16,
+                                     ntrt_cluster = 8,
+                                     categorical = c("location", "incomecat"),
+                                     stratify = "location",
+                                     cutoff = 0.1,
+                                     seed = 12345)
+
+ # Stratification on income category
+ #Two of the income categories contain an odd number of clusters
+ # Stratification is not strictly possible
+
+ Design_stratified_inc_result <- cvcrand(clustername = Dickinson_design$county,
+                                         balancemetric = "l2",
+                                         x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+                                         ntotal_cluster = 16,
+                                         ntrt_cluster = 8,
+                                         categorical = c("location", "incomecat"),
+                                         stratify = "incomecat",
+                                         cutoff = 0.1,
+                                         seed = 12345)
+
 
 }
 \references{
 Raab, G.M. and Butcher, I., 2001. Balance in cluster randomized trials. Statistics in medicine, 20(3), pp.351-365.
 
 Li, F., Lokhnygina, Y., Murray, D.M., Heagerty, P.J. and DeLong, E.R., 2016. An evaluation of constrained randomization for the design and analysis of group randomized trials. Statistics in medicine, 35(10), pp.1565-1579.
+
+Li, F., Turner, E. L., Heagerty, P. J., Murray, D. M., Vollmer, W. M., & DeLong, E. R. (2017). An evaluation of constrained randomization for the design and analysis of group randomized trials with binary outcomes. Statistics in medicine, 36(24), 3791-3806.
+
+Gallis, J. A., Li, F., Yu, H., Turner, E. L. (In Press).  cvcrand and cptest: Efficient design and analysis of cluster randomized trials.  Stata Journal.
+
+Gallis, J. A., Li, Fl. Yu, H., Turner, E. L. (2017).  cvcrand and cptest: Efficient design and analysis of cluster randomized trials.  Stata Conference.  https://www.stata.com/meeting/baltimore17/slides/Baltimore17_Gallis.pdf.
+
+Dickinson, L. M., Beaty, B., Fox, C., Pace, W., Dickinson, W. P., Emsermann, C., & Kempe, A. (2015). Pragmatic cluster randomized trials using covariate constrained randomization: A method for practice-based research networks (PBRNs). The Journal of the American Board of Family Medicine, 28(5), 663-672.
 }
 \author{
 Hengshi Yu <hengshi@umich.edu>, John A. Gallis <john.gallis@duke.edu>, Fan Li <frank.li@duke.edu>, Elizabeth L. Turner <liz.turner@duke.edu>
