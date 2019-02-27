@@ -19,7 +19,7 @@
   \item{communityhealthcenters}{number of community health centers}
 }}
 \source{
-\url{http://www.jabfm.org/content/28/5/663/T5.expansion.html}
+\url{https://www.jabfm.org/content/28/5/663/tab-figures-data}
 }
 \description{
 Two approaches (interventions) are compared for increasing the "up-to-date" immunization rate

@@ -22,7 +22,7 @@
 #'   \item{pediatricpracticetofamilymedicin}{pediatric practice-to-family medicine practice ratio}
 #'   \item{communityhealthcenters}{number of community health centers}
 #' }
-#' @source \url{http://www.jabfm.org/content/28/5/663/T5.expansion.html}
+#' @source \url{https://www.jabfm.org/content/28/5/663/tab-figures-data}
 #' @references
 #'   Dickinson, L. M., B. Beaty, C. Fox, W. Pace, W. P. Dickinson, C. Emsermann,
 #'   and A. Kempe (2015): Pragmatic cluster randomized trials using covariate

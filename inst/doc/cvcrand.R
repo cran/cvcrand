@@ -1,4 +1,4 @@
-## ----setup,echo=FALSE,results="hide"-------------------------------------
+## ----start,echo=FALSE,results="hide"-------------------------------------
 
 library(cvcrand)
 
@@ -10,9 +10,9 @@ knitr::kable(Dickinson_design[ , 1:6])
 ## ---- echo=FALSE, results='asis'-----------------------------------------
 knitr::kable(Dickinson_design[ , 7:11])
 
-## ----cvcrand, fig.keep="all", fig.width = 7, fig.height=4----------------
+## ----cvrall, fig.keep="all", fig.width = 7, fig.height=4-----------------
 
- Design_result <- cvcrand(clustername = Dickinson_design$county,
+ Design_result <- cvrall(clustername = Dickinson_design$county,
                   balancemetric = "l2",
                   x = data.frame(Dickinson_design[ , c("location", "inciis",
                       "uptodateonimmunizations", "hispanic", "incomecat")]),
@@ -28,7 +28,7 @@ knitr::kable(Dickinson_design[ , 7:11])
 
 
 
-## ----set-options, echo=FALSE, fig.keep="all", fig.width = 7, fig.height=4-------------------------
+## ----set-options1, echo=FALSE, fig.keep="all", fig.width = 7, fig.height=4------------------------
 options(width = 100)
  
 
@@ -61,12 +61,17 @@ options(width = 100)
  # the descriptive statistics for all the variables by the two arms from the selected scheme
  Design_result$baseline_table
 
+ # the cluster pair descriptive, which is useful for valid randomization check
+ Design_result$cluster_coin_des
+
+ # the overall allocation summary
+ Design_result$overall_allocations
 
 
-## ----cvcrandst1, fig.keep="all", fig.width = 7, fig.height=4--------------------------------------
+## ----cvrallst1, fig.keep="all", fig.width = 7, fig.height=4---------------------------------------
 # Stratification on location, with constrained randomization on other specified covariates
 
-Design_stratified_result1 <- cvcrand(clustername = Dickinson_design$county,
+Design_stratified_result1 <- cvrall(clustername = Dickinson_design$county,
                                      balancemetric = "l2",
                                      x = data.frame(Dickinson_design[ , c("location", "inciis", 
                                                                           "uptodateonimmunizations", 
@@ -83,10 +88,10 @@ Design_stratified_result1 <- cvcrand(clustername = Dickinson_design$county,
 Design_stratified_result1$baseline_table
 
 
-## ----cvcrandst2, fig.keep="all", fig.width = 7, fig.height=4--------------------------------------
+## ----cvrallst2, fig.keep="all", fig.width = 7, fig.height=4---------------------------------------
 # An alternative and equivalent way to stratify on location
 
-Design_stratified_result2 <- cvcrand(clustername = Dickinson_design$county,
+Design_stratified_result2 <- cvrall(clustername = Dickinson_design$county,
                                      balancemetric = "l2",
                                      x = data.frame(Dickinson_design[ , c("location", "inciis",
                                                                           "uptodateonimmunizations", 
@@ -96,11 +101,63 @@ Design_stratified_result2 <- cvcrand(clustername = Dickinson_design$county,
                                      categorical = c("location", "incomecat"),
                                      stratify = "location",
                                      cutoff = 0.1,
-                                     seed = 12345)
+                                     seed = 12345, 
+                                     check_validity = TRUE)
 
 
 ## ---- fig.keep="all", fig.width = 7, fig.height=4-------------------------------------------------
 Design_stratified_result2$baseline_table
+
+
+## ----cvrcov, fig.keep="all", fig.width = 7, fig.height=4------------------------------------------
+
+# change the categorical variable of interest to have numeric representation
+Dickinson_design_numeric <- Dickinson_design
+Dickinson_design_numeric$location = (Dickinson_design$location == "Rural") * 1
+
+Design_cov_result <- cvrcov(clustername = Dickinson_design_numeric$county,
+                            x = data.frame(Dickinson_design_numeric[ , c("location", "inciis", 
+                                                                          "uptodateonimmunizations", 
+                                                                          "hispanic", "income")]),
+                            ntotal_cluster = 16,
+                            ntrt_cluster = 8,
+                            constraints = c("s5", "mf.5", "any", "any", "mf0.4"), 
+                            categorical = c("location"),
+                            savedata = "dickinson_cov_constrained.csv",
+                            seed = 12345, 
+                            check_validity = TRUE)
+ 
+
+
+## ----set-options2, echo=FALSE, fig.keep="all", fig.width = 7, fig.height=4------------------------
+options(width = 100)
+ 
+
+## ---- fig.keep="all", fig.width = 7, fig.height=4-------------------------------------------------
+
+
+ # the allocation scheme from constrained randomization
+ Design_cov_result$allocation
+ 
+
+ # the statement about how many clusters to be randomized to the intervention and the control arms respectively
+ Design_cov_result$assignment_message
+ 
+ # the statement about how to get the whole randomization space to use in constrained randomization
+ Design_cov_result$scheme_message
+ 
+
+ # the data frame containing the allocation scheme, the clustername as well as the original data frame of covariates
+ Design_cov_result$data_CR
+ 
+ # the descriptive statistics for all the variables by the two arms from the selected scheme
+ Design_cov_result$baseline_table
+
+# the cluster pair descriptive, which is useful for valid randomization check
+Design_cov_result$cluster_coin_des
+
+# the overall allocation summary
+Design_cov_result$overall_allocations
 
 
 ## ---- echo=FALSE, results='asis'------------------------------------------------------------------
