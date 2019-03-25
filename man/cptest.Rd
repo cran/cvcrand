@@ -4,7 +4,7 @@
 \alias{cptest}
 \title{Clustered permutation test for cluster randomized trials}
 \usage{
-cptest(outcome, clustername, z, cspacedatname, outcometype,
+cptest(outcome, clustername, z = NULL, cspacedatname, outcometype,
   categorical = NULL)
 }
 \arguments{
@@ -39,7 +39,8 @@ the contrast statistic is created from the randomization schemes and the cluster
 \dontrun{
 Analysis_result <- cptest(outcome = Dickinson_outcome$outcome,
                           clustername = Dickinson_outcome$county,
-                          z = data.frame(Dickinson_outcome[ , c(2, 3, 4, 5, 6)]),
+                          z = data.frame(Dickinson_outcome[ , c("location", "inciis",
+                              "uptodateonimmunizations", "hispanic", "incomecat")]),
                           cspacedatname = "dickinson_constrained.csv",
                           outcometype = "binary",
                           categorical = c("location","incomecat"))

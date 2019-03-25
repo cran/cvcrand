@@ -11,13 +11,13 @@
 #' @param stratify categorical variables on which to stratify the randomization. It overrides the option \code{weights} when specified. This list of categorical variables should be a subset of the \code{categorical} option if specified.
 #' @param seed seed for simulation and random sampling. It is needed so that the randomization can be replicated. Its default is \code{12345}.
 #' @param balancemetric balance metric to use. Its choices are \code{"l1"} and \code{"l2"}. The default is \code{"l2"}.
-#' @param nosim if TRUE, it overrides the default procedure of simulating when the number of all possible randomization schemes is over the \code{size}, and the program enumerates all randomization schemes. Note: this may consume a lot of memory and cause R to crash
+#' @param nosim if \code{TRUE}, it overrides the default procedure of simulating when the number of all possible randomization schemes is over the \code{size}, and the program enumerates all randomization schemes. Note: this may consume a lot of memory and cause R to crash
 #' @param savedata saves the data set of the constrained randomization space in a csv file if specified by string. The first column of the csv file is an indicator variable of the final randomization scheme in the constrained space. The constrained randomization space will be needed for analysis after the cluster randomized trial is completed if the clustered permutation test is used.
-#' @param savebscores saves the vector of all balance scores across the entire randomization space in a csv file if specified by string. When this option is specified, a histogram is also produced which displays the distribution of all balance scores with a red line on the graph indicating the selected cutoff.
+#' @param bhist if \code{TRUE} of the default value, it produces the histogram of all balance scores with a red line on the graph indicating the selected cutoff.
 #' @param check_validity boolean argument to check the randomization validity or not
 #' @param samearmhi clusters assigned to the same arm as least this often are taken. The default is 0.75. 
 #' @param samearmlo clusters assigned to the same arm at most this often are displayed. The default is 0.25. 
-#' @keywords cluster randomized trails, constrained randomization
+#' @keywords cluster randomized trails, covariate-constrained randomization
 #' @author Hengshi Yu <hengshi@umich.edu>, John A. Gallis <john.gallis@duke.edu>, Fan Li <frank.li@duke.edu>, Elizabeth L. Turner <liz.turner@duke.edu>
 #' @description cvcrand performs constrained randomization for cluster randomized
 #' trials (CRTs), especially suited for CRTs with a small number of clusters. In constrained randomization,
@@ -44,16 +44,17 @@
 #' @export
 #' @examples
 #'
-#' # cvcrand example
+#' # cvrall examples
 #'
 #' Design_result <- cvrall(clustername = Dickinson_design$county,
 #'                          balancemetric = "l2",
-#'                          x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+#'                          x = data.frame(Dickinson_design[ , c("location", "inciis",
+#'                               "uptodateonimmunizations", "hispanic", "incomecat")]),
 #'                          ntotal_cluster = 16,
 #'                          ntrt_cluster = 8,
 #'                          categorical = c("location", "incomecat"),
 #'                          savedata = "dickinson_constrained.csv",
-#'                          savebscores = "dickinson_bscores.csv",
+#'                          bhist = TRUE,
 #'                          cutoff = 0.1,
 #'                          seed = 12345, 
 #'                          check_validity = TRUE)
@@ -62,7 +63,8 @@
 #'
 #' Design_result <- cvrall(clustername = Dickinson_design$county,
 #'                          balancemetric = "l2",
-#'                          x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+#'                          x = data.frame(Dickinson_design[ , c("location", "inciis",
+#'                              "uptodateonimmunizations", "hispanic", "incomecat")]),
 #'                          ntotal_cluster = 16,
 #'                          ntrt_cluster = 8,
 #'                          categorical = c("location", "incomecat"),
@@ -76,7 +78,8 @@
 #'
 #'  Design_stratified_result <- cvrall(clustername = Dickinson_design$county,
 #'                                      balancemetric = "l2",
-#'                                      x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+#'                                      x = data.frame(Dickinson_design[ , c("location", "inciis",
+#'                                          "uptodateonimmunizations", "hispanic", "incomecat")]),
 #'                                      ntotal_cluster = 16,
 #'                                      ntrt_cluster = 8,
 #'                                      categorical = c("location", "incomecat"),
@@ -88,7 +91,8 @@
 #'
 #'  Design_stratified_result <- cvrall(clustername = Dickinson_design$county,
 #'                                      balancemetric = "l2",
-#'                                      x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+#'                                      x = data.frame(Dickinson_design[ , c("location", "inciis",
+#'                                          "uptodateonimmunizations", "hispanic", "incomecat")]),
 #'                                      ntotal_cluster = 16,
 #'                                      ntrt_cluster = 8,
 #'                                      categorical = c("location", "incomecat"),
@@ -102,7 +106,8 @@
 #'
 #'  Design_stratified_inc_result <- cvrall(clustername = Dickinson_design$county,
 #'                                          balancemetric = "l2",
-#'                                          x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+#'                                          x = data.frame(Dickinson_design[ , c("location", "inciis",
+#'                                              "uptodateonimmunizations", "hispanic", "incomecat")]),
 #'                                          ntotal_cluster = 16,
 #'                                          ntrt_cluster = 8,
 #'                                          categorical = c("location", "incomecat"),
@@ -127,9 +132,9 @@
 #' @return \code{clusters_high_pair}  pairs of clusters randomized to the same arm at least \code{samearmhi} of the time.
 #' @return \code{clusters_low_pair} pairs of clusters randomized to the same arm at most \code{samearmlo} of the time.
 #' @return \code{overall_allocations} frequency of acceptable overall allocations.
-#' @return \code{overall_summary} summary of covariates with constraints in the constrained space
 
-cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, ntotal_cluster, ntrt_cluster, cutoff = 0.1, numschemes = NULL, size = 50000, stratify = NULL, seed = NULL, balancemetric = "l2", nosim = FALSE, savedata = NULL, savebscores = NULL, check_validity = FALSE, samearmhi = 0.75, samearmlo = 0.25){
+
+cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, ntotal_cluster, ntrt_cluster, cutoff = 0.1, numschemes = NULL, size = 50000, stratify = NULL, seed = NULL, balancemetric = "l2", nosim = FALSE, savedata = NULL, bhist = TRUE, check_validity = FALSE, samearmhi = 0.75, samearmlo = 0.25){
 
   if (!is.null(seed)) {
       set.seed(seed)
@@ -425,7 +430,7 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
 
     qmt <- pmt[subid, ]
     R_result <- dim(qmt)[1]
-    summary_constraints <- cbind(R, S, R_result, round(R_result/S, 3))
+    summary_constraints <- as.data.frame(cbind(S, R, R_result, paste0(round(R_result/R, 4) * 100, "%")))
     colnames(summary_constraints) <- c("overall allocations", "checked allocations", "accepted allocations", "overall % acceptable")
 
 
@@ -546,7 +551,7 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
 
     qmt <- pmt[subid, ]
     R_result <- dim(qmt)[1]
-    summary_constraints <- cbind(S, R, R_result, round(R_result/S, 3))
+    summary_constraints <- as.data.frame(cbind(S, R, R_result, paste0(round(R_result/R, 4) * 100, "%")))
     colnames(summary_constraints) <- c("overall allocations", "checked allocations", "accepted allocations", "overall % acceptable")
 
 
@@ -577,12 +582,8 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
       # output the schemes' matrix of pmt
 
 
-  if (!is.null(savebscores)){
+  if (bhist){
 
-
-
-
-    write.csv(BL, file = savebscores, row.names=FALSE)
 
     if(sim == 1){
 
@@ -646,8 +647,8 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
         for(k in (j+1):nsub){
           same_arm <- sum((qmt[,j] - qmt[, k]) == 0)
           diff_arm <-  R_result - same_arm
-          same_prop <- same_arm/R_result
-          diff_prop <- 1.0 - same_prop
+          same_prop <- round(same_arm/R_result, 4)
+          diff_prop <- round(1.0 - same_prop, 4)
           index_jk <- which(unlist(lapply(1:dim(n_pair)[1], function(i) setequal(c(j,k), n_pair[i, ]))))
           
           same_arm_count[index_jk] <- same_arm
@@ -658,12 +659,12 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
       }
       first_cluster <- id[n_pair[,1]]
       second_cluster <- id[n_pair[,2]]
-      coin_matrix <- cbind(first_cluster, 
+      coin_matrix <- as.data.frame(cbind(first_cluster, 
                                   second_cluster, 
                                   same_arm_count, 
-                                  same_arm_frac, 
+                                  paste0(same_arm_frac * 100, "%"), 
                                   diff_arm_count, 
-                                  diff_arm_frac)
+                                  paste0(diff_arm_frac * 100, "%")))
       
       
       # Always togerther
@@ -678,7 +679,7 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
 
         alto_all_pt <- rep("100.0%", length(alto_index))
         
-        al_clusters <- cbind(alto_clt_pair, alto_all_pt)
+        al_clusters <- as.data.frame(cbind(alto_clt_pair, alto_all_pt))
         colnames(al_clusters) <- c("cluter pair", "% allocs in the same arm")
       }
 
@@ -694,7 +695,7 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
 
         alnoto_all_pt <- rep("0.0%", length(alnoto_index))
         
-        alno_clusters <- cbind(alnoto_clt_pair, alnoto_all_pt)
+        alno_clusters <- as.data.frame(cbind(alnoto_clt_pair, alnoto_all_pt))
         colnames(alno_clusters) <- c("cluter pair", "% allocs in the same arm")
       }
       
@@ -712,7 +713,7 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
         hi_pt <- paste0(same_arm_frac[hi_index] * 100, "%")
         hi_num <- same_arm_count[hi_index]
         hi_non_num <- diff_arm_count[hi_index]
-        hi_clusters <- cbind(hi_pair, hi_pt, hi_num, hi_non_num)
+        hi_clusters <- as.data.frame(cbind(hi_pair, hi_pt, hi_num, hi_non_num))
         colnames(hi_clusters) <- c("cluster pair", "% allocs in same arm", "# allocs in same arm", "# allocs in different arms")
       }
       
@@ -729,7 +730,7 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
         lo_pt <- paste0(same_arm_frac[lo_index] * 100, "%")
         lo_num <- same_arm_count[lo_index]
         lo_non_num <- diff_arm_count[lo_index]
-        lo_clusters <- cbind(lo_pair, lo_pt, lo_num, lo_non_num)
+        lo_clusters <- as.data.frame(cbind(lo_pair, lo_pt, lo_num, lo_non_num))
         colnames(lo_clusters) <- c("cluster pair", "% allocs in same arm", "# allocs in same arm", "# allocs in different arms")
       }
       
@@ -748,6 +749,9 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
         quantile(diff_arm_frac, prob = c(0, 0.25, 0.5, 0.75, 1))
         )
       )
+      coin_descri <- round(coin_descri, 3)
+
+      
 
 
       colnames(coin_descri) <- c("Mean", "Std Dev", "Minimum", "25th Pctl", 

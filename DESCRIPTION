@@ -1,8 +1,8 @@
 Package: cvcrand
 Type: Package
 Title: Efficient Design and Analysis of Cluster Randomized Trials
-Version: 0.0.3
-Date: 2019-2-26
+Version: 0.0.4
+Date: 2019-3-25
 Authors@R: c(person(given = "Hengshi", family = "Yu", role = c("aut", "cre"), 
              email="hengshi@umich.edu"), 
              person(given = "Fan", family = "Li", role ="aut", 
@@ -29,10 +29,10 @@ Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0
 NeedsCompilation: no
-Packaged: 2019-02-27 13:58:01 UTC; hengshiyu
+Packaged: 2019-03-25 16:30:46 UTC; hengshiyu
 Author: Hengshi Yu [aut, cre],
   Fan Li [aut],
   John A. Gallis [aut],
   Elizabeth L. Turner [aut]
 Repository: CRAN
-Date/Publication: 2019-02-27 14:20:03 UTC
+Date/Publication: 2019-03-25 18:53:26 UTC

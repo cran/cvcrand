@@ -29,7 +29,7 @@ At the end of the study, the individual outcome is collected. The `cvcrand` pack
 
 ## Design: covariate-constrained randomization
 
-In the design of CRTs with two arms, users can use the `cvrall()` function to perform covariate-constrained randomization. And for the analysis part, user would use the `cptest()` function for clustered permutation test. 
+In the design of CRTs with two arms, users can use the `cvrall()` function to perform covariate-constrained randomization or `cvrcov()` function to perform covariate-by-covariate constrained randomization. And for the analysis part, user would use the `cptest()` function for clustered permutation test. 
 
 A cluster is the unit of randomization for a cluster randomized trial. Thus, when the number of clusters is small, there might be some baseline imbalance from the randomization between the arms. Constrained randomization constrained the randomization space to randomization schemes with smaller difference among the covariates between the two arms. 
 
@@ -41,7 +41,11 @@ To reflect the relative importance of different baseline covariates, one may inc
 
 With the baseline values of the specified cluster-level covariates in a cluster randomized trail, the `cvrall()` function in the `cvcrand` package is used to perform the covariate-constrained randomization. 
 
-Each categorical variable is transformed into dummy variables to calculate the balance score. When transforming a categorical variable to dummy variables, the reference level will be dropped if the categorical variable is specified as a factor. Otherwise, the first level in the alphanumerical order will be dropped. Users can also specify a certain reference level for each categorical variable by manually coding dummy variables before running the `cvrall()` function.
+Each categorical variable is transformed into dummy variables to calculate the balance score. When transforming a categorical variable to dummy variables, the reference level will be dropped if the categorical variable is specified as a factor. Otherwise, the first level in the alphanumerical order will be dropped. Users can also specify a certain reference level for each categorical variable by manually coding dummy variables before running the `cvrall()` function. In addition to constraining the randomization space via a scalar summary score, we developed the `cvrcov()` function to implement constrained randomization with baseline balance defined directly through each covariate.
+
+We followed the routine developed by [@greene2017sas] to give covariate-by-covariate constraints based on arm mean difference or arm total difference. For each covariate to be considered for constrained randomization, a specific constraint is to be specified by users. The constraint of `"any"` means no constraints. If not `"any"`, the first character letter of `"m"` denotes absolute mean difference, and `"s"` means absolute sum difference. If the second character is `"f"`, the previous metric is constrained to be smaller or equal to the fraction with the number followed of the overall mean for `"m"` or mean arm total for `"s"`. If not `"f"` at the second character, the metric is just constrained to be smaller or equal to the value followed.
+
+To check the randomization validity ([@bailey1987valid]), the argument of `check_validity` in both `cvrall()` and `cvrcov()` functions could be specified to be `TRUE`. Then the functions would provide summary statistics on cluster pairs that always or never appear together in the same arm, which might imply the validity of randomization. 
 
 
 ## `cvrall()` example for covariate-constrained randomization
@@ -74,12 +78,10 @@ We saved the constrained randomization space in a CSV file in `"dickinson_constr
                   ntrt_cluster = 8,
                   categorical = c("location", "incomecat"),
                   savedata = "dickinson_constrained.csv",
-                  savebscores = "dickinson_bscores.csv",
+                  bhist = TRUE,
                   cutoff = 0.1,
                   seed = 12345)
  
- 
-
 
 ```
 
@@ -181,22 +183,6 @@ Design_stratified_result2$baseline_table
 
 ```
 The results from `Design_stratified_result1$baseline_table` and `Design_stratified_result2$baseline_table` are the same. The final selected scheme from cvrall() now has 4 `"Urban"` counties in both arms. The `location` covariate has been stratified for the randomization for the randomization through the `weights` or `stratify` argument in the ` cvrall()` function. 
-
-## Design: covariate-constrained randomization
-
-In the design of CRTs with two arms, users can use the `cvrall()` function to perform covariate-constrained randomization. And for the analysis part, user would use the `cptest()` function for clustered permutation test. 
-
-A cluster is the unit of randomization for a cluster randomized trial. Thus, when the number of clusters is small, there might be some baseline imbalance from the randomization between the arms. Constrained randomization constrained the randomization space to randomization schemes with smaller difference among the covariates between the two arms. 
-
-The balance score for constrained randomization in the program is developed from [@raab2001balance]. Suppose $n$, $n_T$, and $n_C$ are the total number of clusters, the number of clusters in the treatment arm and the control arm respectively. Suppose also that there are $K$ cluster-level variables including the continuous covariates as well as the dummy variables created from the categorical covariates. $x_{ik}$ is the $k$th covariate ($k=1,\ldots,K$) of cluster $i$. $\bar{x}_{Tk}=\sum_{i=1}^{n_T}x_{ik}/n_T$ and $\bar{x}_{Ck}=\sum_{i=n_T+1}^{n}x_{ik}/n_C$ are the means of the $k$th cluster-level variable in the treatment arm and the control arm, respectively, and $\omega_{k}$ is a pre-determined weight for the $k$th variable. We choose $\omega_{k}$ to be the inverse of the variance of the $k$th variable across all clusters following [@raab2001balance] and [@li2016evaluation], namely $\omega_k={1}/{s_k^2}=\frac{n-1}{\sum_{i=1}^n(x_{ik}-\bar{x}_k)^2}$ with $\bar{x}_k=\sum_{i=1}^nx_{ik}/n$. 
-
-There are two choices of metric for the balance score. The balance score of the `"l2"` metric is defined as $B_{(l2)}=\sum_{k=1}^{K}\omega_k(\bar{x}_{Tk}-\bar{x}_{Ck})^2$. And if `"l1"` metric from [@li2017evaluation] is specified, the balance score is defined as $B_{(l1)}=\sum_{k=1}^{K}\tilde{\omega}_k\left|\bar{x}_{Tk}-\bar{x}_{Ck}\right|$, where $\tilde{\omega}_k$ is chosen to be the inverse of the standard deviation of the $k$th variable $s_k$. 
-
-To reflect the relative importance of different baseline covariates, one may include user-defined weights in the `"l1"` and `"l2"` balance metrics. The `"l2"` balance metric is set to be $B_{(l2)}=\sum_{k=1}^{K}d_k\omega_k(\bar{x}_{Tk}-\bar{x}_{Ck})^2$, where $d_k$ is the user-defined weight for the $k$th variable. By default, $d_k=1$ for all variables. A large user-defined weight $d_k>1$ could be assigned to a variable of importance when assessing the balance scores. Similarly, we modify the $l1$ balance metric by allowing for user-defined weight as $B_{(l1)}=\sum_{k=1}^{K}d_k\tilde{\omega}_k\left|\bar{x}_{Tk}-\bar{x}_{Ck}\right|$. 
-
-With the baseline values of the specified cluster-level covariates in a cluster randomized trail, the `cvrall()` function in the `cvcrand` package is used to perform the covariate-constrained randomization. 
-
-Each categorical variable is transformed into dummy variables to calculate the balance score. When transforming a categorical variable to dummy variables, the reference level will be dropped if the categorical variable is specified as a factor. Otherwise, the first level in the alphanumerical order will be dropped. Users can also specify a certain reference level for each categorical variable by manually coding dummy variables before running the `cvrall()` function.
 
 
 ## `cvrcov()` example for covariate-by-covariate constrained randomization

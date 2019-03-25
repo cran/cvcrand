@@ -30,7 +30,8 @@
 #'\dontrun{
 #' Analysis_result <- cptest(outcome = Dickinson_outcome$outcome,
 #'                           clustername = Dickinson_outcome$county,
-#'                           z = data.frame(Dickinson_outcome[ , c(2, 3, 4, 5, 6)]),
+#'                           z = data.frame(Dickinson_outcome[ , c("location", "inciis",
+#'                               "uptodateonimmunizations", "hispanic", "incomecat")]),
 #'                           cspacedatname = "dickinson_constrained.csv",
 #'                           outcometype = "binary",
 #'                           categorical = c("location","incomecat"))
@@ -45,10 +46,10 @@
 
 
 
-cptest <- function(outcome, clustername, z, cspacedatname, outcometype, categorical = NULL){
+cptest <- function(outcome, clustername, z = NULL, cspacedatname, outcometype, categorical = NULL){
     x <- z
-
-    if (is.null(categorical)) { # if there are no categorical variables specified
+  if(!is.null(z)){
+       if (is.null(categorical)) { # if there are no categorical variables specified
 
    if (sum(apply(x, 2, function(x) length(unique(x[!is.na(x)]))) <= 1) >= 1) {
      ## check the variables with only one unique value, i.e. no variation
@@ -130,6 +131,9 @@ cptest <- function(outcome, clustername, z, cspacedatname, outcometype, categori
    }
 
   }
+  
+  }
+ 
 
 
   pmt <- read.csv(cspacedatname, header = TRUE)
@@ -173,8 +177,12 @@ cptest <- function(outcome, clustername, z, cspacedatname, outcometype, categori
 
 
 
-
-   fm <- as.formula(paste0("outcome~", paste(names(x), collapse = "+")))
+  if(!is.null(z)){
+    fm <- as.formula(paste0("outcome~", paste(names(x), collapse = "+")))
+  }else{
+    fm <- as.formula("outcome ~ 1")
+  }
+   
    # the formula of the model
 
    x$outcome <- outcome
@@ -192,7 +200,7 @@ cptest <- function(outcome, clustername, z, cspacedatname, outcometype, categori
 
    } else if (outcometype == "binary") {
 
-       ADJMeans <- tapply(glm(formula = fm, family = "binomial", data = x)$residuals, clustername, mean)
+       ADJMeans <- tapply(residuals(glm(formula = fm, family = "binomial", data = x), type = "response"), clustername, mean)
        # for binary outcome, we use logistic regression
 
        Diffs <- as.matrix(dpmt) %*% ADJMeans

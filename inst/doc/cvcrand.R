@@ -20,12 +20,10 @@ knitr::kable(Dickinson_design[ , 7:11])
                   ntrt_cluster = 8,
                   categorical = c("location", "incomecat"),
                   savedata = "dickinson_constrained.csv",
-                  savebscores = "dickinson_bscores.csv",
+                  bhist = TRUE,
                   cutoff = 0.1,
                   seed = 12345)
  
- 
-
 
 
 ## ----set-options1, echo=FALSE, fig.keep="all", fig.width = 7, fig.height=4------------------------

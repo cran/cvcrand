@@ -5,7 +5,7 @@
 \title{Covariate-constrained randomization for cluster randomized trials}
 \usage{
 cvrcov(clustername = NULL, x, categorical = NULL, constraints,
-  ntotal_cluster, ntrt_cluster, size = 1e+05, seed = NULL,
+  ntotal_cluster, ntrt_cluster, size = 50000, seed = NULL,
   nosim = FALSE, savedata = NULL, check_validity = FALSE,
   samearmhi = 0.75, samearmlo = 0.25)
 }
@@ -75,15 +75,16 @@ of randomization schemes and samples one scheme from the constrained space as th
 }
 \examples{
 
-# cvcrand example
+# cvrcov example
 
 Dickinson_design_numeric <- Dickinson_design
 Dickinson_design_numeric$location = (Dickinson_design$location == "Rural") * 1
 Design_cov_result <- cvrcov(clustername = Dickinson_design_numeric$county,
-                            x = data.frame(Dickinson_design_numeric[ , c(2, 3, 5, 7, 11)]),
+                            x = data.frame(Dickinson_design_numeric[ , c("location", "inciis",
+                                "uptodateonimmunizations", "hispanic", "income")]),
                             ntotal_cluster = 16,
                             ntrt_cluster = 8,
-                            constraints = c("s5", "mf.5", "any", "any", "mf0.4"), 
+                            constraints = c("s5", "mf.5", "any", "mf0.2", "mf0.2"), 
                             categorical = c("location"),
                             savedata = "dickinson_cov_constrained.csv",
                             seed = 12345, 

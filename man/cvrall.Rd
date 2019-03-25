@@ -7,7 +7,7 @@
 cvrall(clustername = NULL, x, categorical = NULL, weights = NULL,
   ntotal_cluster, ntrt_cluster, cutoff = 0.1, numschemes = NULL,
   size = 50000, stratify = NULL, seed = NULL, balancemetric = "l2",
-  nosim = FALSE, savedata = NULL, savebscores = NULL,
+  nosim = FALSE, savedata = NULL, bhist = TRUE,
   check_validity = FALSE, samearmhi = 0.75, samearmlo = 0.25)
 }
 \arguments{
@@ -35,11 +35,11 @@ cvrall(clustername = NULL, x, categorical = NULL, weights = NULL,
 
 \item{balancemetric}{balance metric to use. Its choices are \code{"l1"} and \code{"l2"}. The default is \code{"l2"}.}
 
-\item{nosim}{if TRUE, it overrides the default procedure of simulating when the number of all possible randomization schemes is over the \code{size}, and the program enumerates all randomization schemes. Note: this may consume a lot of memory and cause R to crash}
+\item{nosim}{if \code{TRUE}, it overrides the default procedure of simulating when the number of all possible randomization schemes is over the \code{size}, and the program enumerates all randomization schemes. Note: this may consume a lot of memory and cause R to crash}
 
 \item{savedata}{saves the data set of the constrained randomization space in a csv file if specified by string. The first column of the csv file is an indicator variable of the final randomization scheme in the constrained space. The constrained randomization space will be needed for analysis after the cluster randomized trial is completed if the clustered permutation test is used.}
 
-\item{savebscores}{saves the vector of all balance scores across the entire randomization space in a csv file if specified by string. When this option is specified, a histogram is also produced which displays the distribution of all balance scores with a red line on the graph indicating the selected cutoff.}
+\item{bhist}{if \code{TRUE} of the default value, it produces the histogram of all balance scores with a red line on the graph indicating the selected cutoff.}
 
 \item{check_validity}{boolean argument to check the randomization validity or not}
 
@@ -79,8 +79,6 @@ cvrall(clustername = NULL, x, categorical = NULL, weights = NULL,
 \code{clusters_low_pair} pairs of clusters randomized to the same arm at most \code{samearmlo} of the time.
 
 \code{overall_allocations} frequency of acceptable overall allocations.
-
-\code{overall_summary} summary of covariates with constraints in the constrained space
 }
 \description{
 cvcrand performs constrained randomization for cluster randomized
@@ -94,16 +92,17 @@ treats the subset as the constrained space of randomization schemes and samples 
 }
 \examples{
 
-# cvcrand example
+# cvrall examples
 
 Design_result <- cvrall(clustername = Dickinson_design$county,
                          balancemetric = "l2",
-                         x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+                         x = data.frame(Dickinson_design[ , c("location", "inciis",
+                              "uptodateonimmunizations", "hispanic", "incomecat")]),
                          ntotal_cluster = 16,
                          ntrt_cluster = 8,
                          categorical = c("location", "incomecat"),
                          savedata = "dickinson_constrained.csv",
-                         savebscores = "dickinson_bscores.csv",
+                         bhist = TRUE,
                          cutoff = 0.1,
                          seed = 12345, 
                          check_validity = TRUE)
@@ -112,7 +111,8 @@ Design_result <- cvrall(clustername = Dickinson_design$county,
 
 Design_result <- cvrall(clustername = Dickinson_design$county,
                          balancemetric = "l2",
-                         x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+                         x = data.frame(Dickinson_design[ , c("location", "inciis",
+                             "uptodateonimmunizations", "hispanic", "incomecat")]),
                          ntotal_cluster = 16,
                          ntrt_cluster = 8,
                          categorical = c("location", "incomecat"),
@@ -126,7 +126,8 @@ Design_result <- cvrall(clustername = Dickinson_design$county,
 
  Design_stratified_result <- cvrall(clustername = Dickinson_design$county,
                                      balancemetric = "l2",
-                                     x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+                                     x = data.frame(Dickinson_design[ , c("location", "inciis",
+                                         "uptodateonimmunizations", "hispanic", "incomecat")]),
                                      ntotal_cluster = 16,
                                      ntrt_cluster = 8,
                                      categorical = c("location", "incomecat"),
@@ -138,7 +139,8 @@ Design_result <- cvrall(clustername = Dickinson_design$county,
 
  Design_stratified_result <- cvrall(clustername = Dickinson_design$county,
                                      balancemetric = "l2",
-                                     x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+                                     x = data.frame(Dickinson_design[ , c("location", "inciis",
+                                         "uptodateonimmunizations", "hispanic", "incomecat")]),
                                      ntotal_cluster = 16,
                                      ntrt_cluster = 8,
                                      categorical = c("location", "incomecat"),
@@ -152,7 +154,8 @@ Design_result <- cvrall(clustername = Dickinson_design$county,
 
  Design_stratified_inc_result <- cvrall(clustername = Dickinson_design$county,
                                          balancemetric = "l2",
-                                         x = data.frame(Dickinson_design[ , c(2, 3, 5, 7, 10)]),
+                                         x = data.frame(Dickinson_design[ , c("location", "inciis",
+                                             "uptodateonimmunizations", "hispanic", "incomecat")]),
                                          ntotal_cluster = 16,
                                          ntrt_cluster = 8,
                                          categorical = c("location", "incomecat"),
@@ -179,7 +182,7 @@ Bailey, R.A. and Rowley, C.A., 1987. Valid randomization. Proceedings of the Roy
 Hengshi Yu <hengshi@umich.edu>, John A. Gallis <john.gallis@duke.edu>, Fan Li <frank.li@duke.edu>, Elizabeth L. Turner <liz.turner@duke.edu>
 }
 \keyword{cluster}
-\keyword{constrained}
+\keyword{covariate-constrained}
 \keyword{randomization}
 \keyword{randomized}
 \keyword{trails,}
