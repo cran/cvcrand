@@ -4,29 +4,31 @@
 \name{Dickinson_design}
 \alias{Dickinson_design}
 \title{Raw county-level variables for study 1 in Dickinson et al (2015)}
-\format{A data frame with 16 rows and 7 variables:
+\format{
+A data frame with 16 rows and 11 variables:
 \describe{
   \item{county}{the identification for the county}
   \item{location}{urban or rural}
   \item{inciis}{percentage of children aged 19-35 months in the Colorado Immunization Information System (CIIS)}
   \item{numberofchildrenages1935months}{number of children aged 19-35 months}
   \item{uptodateonimmunizations}{percentage of children already up-to-date on their immunization}
-  \item{africanamerican}{percentage of African American}
-  \item{hispanic}{percentage of Hispanic ethnicity}
+  \item{africanamerican}{percentage of population that is African American}
+  \item{hispanic}{percentage of population that is Hispanic}
   \item{income}{average income}
   \item{incomecat}{average income categorized into tertiles}
   \item{pediatricpracticetofamilymedicin}{pediatric practice-to-family medicine practice ratio}
   \item{communityhealthcenters}{number of community health centers}
-}}
+}
+}
 \source{
 \url{https://www.jabfm.org/content/28/5/663/tab-figures-data}
 }
 \description{
-Two approaches (interventions) are compared for increasing the "up-to-date" immunization rate
- in 19- to 35-month-old children. 16 counties in Colorado 1:1 are randomized to either a
+Two approaches (interventions) were compared for increasing the "up-to-date" immunization rate
+ in 19- to 35-month-old children. 16 counties in Colorado 1:1 were randomized 1:1 to either a
  population-based approach or a practice-based approach. Ahead of randomization, several
- county-level variables are collected, and a subset of them are used for covariate constrained
- randomization. The continuous variable of average income is categorized to illustrate the
+ county-level variables were collected, and a subset of them are used for covariate constrained
+ randomization. The continuous variable of average income is categorized into tertiles to illustrate the
  use of cvcrand on multi-category variables. And the percentage in CIIS variable is truncated at 100%.
 }
 \references{

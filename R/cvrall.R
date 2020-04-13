@@ -5,27 +5,27 @@
 #' @param weights a vector of user-specified weights for the covariates to calculate the balance score. The weight for a categorical variable will be replicated for the dummy variables created. Note that the \code{weights} option can be used to conduct stratification on variables. For example, a variable with a relatively large weight like \code{1000} and all other variables with a weight of \code{1} will cause the randomization scheme chosen to be stratified by the variable with the large weight, assuming a low \code{cutoff} value is specified.
 #' @param ntotal_cluster the total number of clusters to be randomized. It must be a positive integer and equal to the number of rows of the data.
 #' @param ntrt_cluster  the number of clusters that the researcher wants to assign to the treatment arm. It must be a positive integer less than the total number of clusters.
-#' @param cutoff quantile cutoff of the distribution of balance score below which a randomization scheme is sampled. Its default is \code{0.1}, and it must be between 0 and 1. The \code{cutoff} option is overriden by the \code{numschemes} option.
+#' @param cutoff quantile cutoff of the distribution of balance score below which a randomization scheme is sampled. Its default is \code{0.1}, and it must be between 0 and 1. The \code{cutoff} option is overridden by the \code{numschemes} option.
 #' @param numschemes number of randomization schemes to form the constrained space for the final randomization scheme to be selected. If specified, it overrides the option \code{cutoff} and the program will randomly sample the final randomization scheme from the constrained space of randomization schemes with the \code{numschemes} smallest balance scores. It must be a positive integer.
-#' @param size number of randomization schemes to simulate if the number of all possible randomization schemes is over \code{size}. Its default is \code{50,000}, and must be a positive integer. It can be overriden by the \code{nosim} option.
+#' @param size number of randomization schemes to simulate if the number of all possible randomization schemes is over \code{size}. Its default is \code{50,000}, and must be a positive integer. It can be overridden by the \code{nosim} option.
 #' @param stratify categorical variables on which to stratify the randomization. It overrides the option \code{weights} when specified. This list of categorical variables should be a subset of the \code{categorical} option if specified.
 #' @param seed seed for simulation and random sampling. It is needed so that the randomization can be replicated. Its default is \code{12345}.
 #' @param balancemetric balance metric to use. Its choices are \code{"l1"} and \code{"l2"}. The default is \code{"l2"}.
 #' @param nosim if \code{TRUE}, it overrides the default procedure of simulating when the number of all possible randomization schemes is over the \code{size}, and the program enumerates all randomization schemes. Note: this may consume a lot of memory and cause R to crash
-#' @param savedata saves the data set of the constrained randomization space in a csv file if specified by string. The first column of the csv file is an indicator variable of the final randomization scheme in the constrained space. The constrained randomization space will be needed for analysis after the cluster randomized trial is completed if the clustered permutation test is used.
+#' @param savedata saves the data set of the constrained randomization space in a csv file if specified by \code{savedata}. The first column of the csv file is an indicator variable of the final randomization scheme in the constrained space. The constrained randomization space will be needed for analysis after the cluster randomized trial is completed if the clustered permutation test is used.
 #' @param bhist if \code{TRUE} of the default value, it produces the histogram of all balance scores with a red line on the graph indicating the selected cutoff.
 #' @param check_validity boolean argument to check the randomization validity or not
-#' @param samearmhi clusters assigned to the same arm as least this often are taken. The default is 0.75. 
-#' @param samearmlo clusters assigned to the same arm at most this often are displayed. The default is 0.25. 
-#' @keywords cluster randomized trails, covariate-constrained randomization
-#' @author Hengshi Yu <hengshi@umich.edu>, John A. Gallis <john.gallis@duke.edu>, Fan Li <frank.li@duke.edu>, Elizabeth L. Turner <liz.turner@duke.edu>
-#' @description cvcrand performs constrained randomization for cluster randomized
+#' @param samearmhi clusters assigned to the same arm as least this often are displayed. The default is \code{0.75}. 
+#' @param samearmlo clusters assigned to the same arm at most this often are displayed. The default is \code{0.25}. 
+#' @keywords cluster-randomized-trails covariate-constrained-randomization
+#' @author Hengshi Yu <hengshi@umich.edu>, Fan Li <fan.f.li@yale.edu>, John A. Gallis <john.gallis@duke.edu>, Elizabeth L. Turner <liz.turner@duke.edu>
+#' @description \code{cvrall} performs constrained randomization for cluster randomized
 #' trials (CRTs), especially suited for CRTs with a small number of clusters. In constrained randomization,
 #' a randomization scheme is randomly sampled from a subset of all possible randomization schemes
-#' based on the value of a balancing criterion called a balance score. The \code{cvcrand} function has two choices of "l1" and "l2" metrics for balance score.
+#' based on the value of a balancing criterion called a balance score. The \code{cvrall} function has two choices of "l1" and "l2" metrics for balance score.
 #'
-#' The \code{cvcrand} function enumerates all randomization schemes or chooses the unique ones among some simulated randomization schemes as specified by the user.
-#' Some cluster-level "continuous" or "categorical" covariates are then used to calculate the balance scores for the unique schemes. A subset of the randomization schemes is chosen based on user-specified cutoff of certain quantile of the distribution of the balance scores or based on a fixed number of schemes with the smallest balance scores. The \code{cvcrand} function
+#' The \code{cvrall} function enumerates all randomization schemes or chooses the unique ones among some simulated randomization schemes as specified by the user.
+#' Some cluster-level continuous or categorical covariates are then used to calculate the balance scores for the unique schemes. A subset of the randomization schemes is chosen based on a user-specified cutoff at a certain quantile of the distribution of the balance scores or based on a fixed number of schemes with the smallest balance scores. The \code{cvrall} function
 #' treats the subset as the constrained space of randomization schemes and samples one scheme from the constrained space as the final chosen scheme.
 #'
 #' @references
@@ -44,6 +44,7 @@
 #' @export
 #' @examples
 #'
+#'
 #' # cvrall examples
 #'
 #' Design_result <- cvrall(clustername = Dickinson_design$county,
@@ -53,13 +54,14 @@
 #'                          ntotal_cluster = 16,
 #'                          ntrt_cluster = 8,
 #'                          categorical = c("location", "incomecat"),
-#'                          savedata = "dickinson_constrained.csv",
+#'                          ###### Option to save the constrained space ######
+#'                          # savedata = "dickinson_constrained.csv",
 #'                          bhist = TRUE,
 #'                          cutoff = 0.1,
 #'                          seed = 12345, 
 #'                          check_validity = TRUE)
 #'
-#' # cvcrand example with weights specified
+#' # cvrall example with weights specified
 #'
 #' Design_result <- cvrall(clustername = Dickinson_design$county,
 #'                          balancemetric = "l2",
@@ -101,7 +103,7 @@
 #'                                      seed = 12345)
 #'
 #'  # Stratification on income category
-#'  #Two of the income categories contain an odd number of clusters
+#'  # Two of the income categories contain an odd number of clusters
 #'  # Stratification is not strictly possible
 #'
 #'  Design_stratified_inc_result <- cvrall(clustername = Dickinson_design$county,
@@ -114,7 +116,7 @@
 #'                                          stratify = "incomecat",
 #'                                          cutoff = 0.1,
 #'                                          seed = 12345)
-#'
+#' 
 #'
 #' @return \code{balancemetric} the balance metric used
 #' @return \code{allocation} the allocation scheme from constrained randomization
@@ -123,10 +125,10 @@
 #' @return \code{scheme_message} the statement about how to get the whole randomization space to use in constrained randomization
 #' @return \code{cutoff_message} the statement about the cutoff in the constrained space
 #' @return \code{choice_message} the statement about the selected scheme from constrained randomization
-#' @return \code{data_CR} the data frame containing the allocation scheme, the clustername as well as the original data frame of covariates
+#' @return \code{data_CR} the data frame containing the allocation scheme, the \code{clustername}, and the original data frame of covariates
 #' @return \code{baseline_table} the descriptive statistics for all the variables by the two arms from the selected scheme
 #' @return \code{cluster_coincidence} cluster coincidence matrix
-#' @return \code{cluster_coin_des} cluster coincedence descriptive
+#' @return \code{cluster_coin_des} cluster coincidence descriptive
 #' @return \code{clusters_always_pair} pairs of clusters always allocated to the same arm.
 #' @return \code{clusters_always_not_pair} pairs of clusters always allocated to different arms.
 #' @return \code{clusters_high_pair}  pairs of clusters randomized to the same arm at least \code{samearmhi} of the time.
@@ -385,6 +387,12 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
 
       BLcut <- BL[order(BL)[cho]]
          # B score subset bechmark
+      if (cho <= 1) {
+        ## check the variables with only one unique value, i.e. no variation
+
+        warning("Warning: less than or equal to 1 scheme meets the constraints for the constrained space")
+        BLcut = NaN
+      }
 
       rw <- sample(subid, 1)
             # choice from B
@@ -414,6 +422,12 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
 
       BLcut <- BL[order(BL)[cho]]
       # B score subset bechmark
+      if (cho <= 1) {
+        ## check the variables with only one unique value, i.e. no variation
+
+        warning("Warning: less than or equal to 1 scheme meets the constraints for the constrained space")
+        BLcut = NaN
+      }
 
       rw <- sample(subid, 1)
            # choice from B
@@ -428,7 +442,7 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
     }
 
 
-    qmt <- pmt[subid, ]
+    qmt <- pmt[subid, ,drop = FALSE]
     R_result <- dim(qmt)[1]
     summary_constraints <- as.data.frame(cbind(S, R, R_result, paste0(round(R_result/R, 4) * 100, "%")))
     colnames(summary_constraints) <- c("overall allocations", "checked allocations", "accepted allocations", "overall % acceptable")
@@ -510,7 +524,12 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
 
               BLcut <- BL[order(BL)[cho]]
               # B score subset bechmark
+              if (cho <= 1) {
+                ## check the variables with only one unique value, i.e. no variation
 
+                warning("Warning: less than or equal to 1 scheme meets the constraints for the constrained space")
+                BLcut = NaN
+              }
               rw <- sample(subid, 1)
                  # choice from B
 
@@ -538,7 +557,12 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
 
       BLcut <- BL[order(BL)[cho]]
        # B score subset bechmark
+      if (cho <= 1) {
+        ## check the variables with only one unique value, i.e. no variation
 
+        warning("Warning: less than or equal to 1 scheme meets the constraints for the constrained space")
+        BLcut = NaN
+      }
       rw <- sample(subid, 1)
        # choice from B
 
@@ -549,7 +573,7 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
       # allocation from the choice from  B
     }
 
-    qmt <- pmt[subid, ]
+    qmt <- pmt[subid, ,drop = FALSE]
     R_result <- dim(qmt)[1]
     summary_constraints <- as.data.frame(cbind(S, R, R_result, paste0(round(R_result/R, 4) * 100, "%")))
     colnames(summary_constraints) <- c("overall allocations", "checked allocations", "accepted allocations", "overall % acceptable")

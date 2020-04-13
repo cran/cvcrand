@@ -1,16 +1,16 @@
-## ----start,echo=FALSE,results="hide"-------------------------------------
+## ----start,echo=FALSE,results="hide"------------------------------------------
 
 library(cvcrand)
 
 
 
-## ---- echo=FALSE, results='asis'-----------------------------------------
+## ---- echo=FALSE, results='asis'----------------------------------------------
 knitr::kable(Dickinson_design[ , 1:6])
 
-## ---- echo=FALSE, results='asis'-----------------------------------------
+## ---- echo=FALSE, results='asis'----------------------------------------------
 knitr::kable(Dickinson_design[ , 7:11])
 
-## ----cvrall, fig.keep="all", fig.width = 7, fig.height=4-----------------
+## ----cvrall, fig.keep="all", fig.width = 7, fig.height=4----------------------
 
  Design_result <- cvrall(clustername = Dickinson_design$county,
                   balancemetric = "l2",
@@ -19,7 +19,8 @@ knitr::kable(Dickinson_design[ , 7:11])
                   ntotal_cluster = 16,
                   ntrt_cluster = 8,
                   categorical = c("location", "incomecat"),
-                  savedata = "dickinson_constrained.csv",
+                  ###### Option to save the constrained space #####
+                  # savedata = "dickinson_constrained.csv",
                   bhist = TRUE,
                   cutoff = 0.1,
                   seed = 12345)
@@ -121,7 +122,8 @@ Design_cov_result <- cvrcov(clustername = Dickinson_design_numeric$county,
                             ntrt_cluster = 8,
                             constraints = c("s5", "mf.5", "any", "any", "mf0.4"), 
                             categorical = c("location"),
-                            savedata = "dickinson_cov_constrained.csv",
+                            ###### Option to save the constrained space #####
+                            # savedata = "dickinson_cov_constrained.csv",
                             seed = 12345, 
                             check_validity = TRUE)
  

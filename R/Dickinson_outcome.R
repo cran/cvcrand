@@ -4,9 +4,9 @@
 #'   At the end of the study, the researchers will have ascertained the outcome in the
 #'   16 clusters. Suppose that the researchers were able to assess 300 children in each cluster.
 #'   We simulated correlated outcome data at the individual level using a generalized linear
-#'   mixed model (GLMM) to induce correlation by include a random effect. The intracluster
+#'   mixed model (GLMM) to induce correlation by including a random effect. The intracluster
 #'   correlation (ICC) was set to be 0.01, using the latent response definition provided in
-#'   Eldrige et al. (2009). This is a reasonable value of the ICC the population health studies
+#'   Eldrige et al. (2009). This is a reasonable value of the ICC for population health studies
 #'   (Hannan et al. 1994). We simulated one data set, with the outcome data dependent on the
 #'   county-level covariates used in the constrained randomization design and a positive treatment
 #'   effect so that the practice-based intervention increases up-to-date immunization rates more
@@ -14,16 +14,16 @@
 #'   if he or she is up-to-date on immunizations and 0 otherwise.
 #'
 #'   Note that we still categorize the continuous variable of average income to illustrate
-#'   the use of cvcrand on multi-category variables, and we trancated the percentage
+#'   the use of cvcrand on multi-category variables, and we truncated the percentage
 #'   in CIIS variable at 100%.
 #' @docType data
-#' @format A data frame with 3200 rows and 8 variables:
+#' @format A data frame with 4800 rows and 7 variables:
 #' \describe{
 #'   \item{county}{the identification for the county}
 #'   \item{location}{urban or rural}
 #'   \item{inciis}{percentage of children ages 19-35 months in the Colorado Immunization Information System (CIIS)}
 #'   \item{uptodateonimmunizations}{percentage of children already up-to-date on their immunization}
-#'   \item{hispanic}{percentage of Hispanic}
+#'   \item{hispanic}{percentage of population that is Hispanic}
 #'   \item{incomecat}{average income categorized into tertiles}
 #'   \item{outcome}{the status of being up-to-date on immunizations}
 #' }

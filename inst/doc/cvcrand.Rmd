@@ -1,6 +1,6 @@
 ---
 title: "cvcrand package"
-author: "Hengshi Yu,  Fan Li, John A. Gallis, and  Elizabeth L. Turner"
+author: "Hengshi Yu, Fan Li, John A. Gallis and  Elizabeth L. Turner"
 date: "`r Sys.Date()`"
 bibliography: references.bib
 output: rmarkdown::html_vignette
@@ -77,7 +77,8 @@ We saved the constrained randomization space in a CSV file in `"dickinson_constr
                   ntotal_cluster = 16,
                   ntrt_cluster = 8,
                   categorical = c("location", "incomecat"),
-                  savedata = "dickinson_constrained.csv",
+                  ###### Option to save the constrained space #####
+                  # savedata = "dickinson_constrained.csv",
                   bhist = TRUE,
                   cutoff = 0.1,
                   seed = 12345)
@@ -208,7 +209,8 @@ Design_cov_result <- cvrcov(clustername = Dickinson_design_numeric$county,
                             ntrt_cluster = 8,
                             constraints = c("s5", "mf.5", "any", "any", "mf0.4"), 
                             categorical = c("location"),
-                            savedata = "dickinson_cov_constrained.csv",
+                            ###### Option to save the constrained space #####
+                            # savedata = "dickinson_cov_constrained.csv",
                             seed = 12345, 
                             check_validity = TRUE)
  
@@ -253,7 +255,7 @@ Design_cov_result$overall_allocations
 From the output of `Design_cov_result$baseline_table`, the selected scheme is able to properly balance the baseline values of the covariates. The selected scheme is shown in `Design_cov_result$allocation`. 
 
 
-## Analysis: Clustered Permutation Test
+## Analysis: clustered permutation test
 
 At the end of cluster randomized trials, individual outcomes are collected. Permutation test based on [@gail1996design] and [@li2016evaluation] is then applied to the continuous or binary outcome with some individual-level covariates. 
 
@@ -294,7 +296,7 @@ The result of `"cptest()"` includes the final scheme for the cluster randomized 
  Analysis_result 
 ``` 
 
-From the p-value of `0.0497` in `Analysis_result`, the probability of up-to-date on immunizations for the practice-based approach (`1`) is significantly different from that for the population-based approach (`0`). 
+From the p-value of `0.042` in `Analysis_result`, the probability of up-to-date on immunizations for the practice-based approach (`1`) is significantly different from that for the population-based approach (`0`). 
 
 # Session Information
 

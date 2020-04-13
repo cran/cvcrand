@@ -4,11 +4,26 @@
 \alias{cvrall}
 \title{Covariate-constrained randomization for cluster randomized trials}
 \usage{
-cvrall(clustername = NULL, x, categorical = NULL, weights = NULL,
-  ntotal_cluster, ntrt_cluster, cutoff = 0.1, numschemes = NULL,
-  size = 50000, stratify = NULL, seed = NULL, balancemetric = "l2",
-  nosim = FALSE, savedata = NULL, bhist = TRUE,
-  check_validity = FALSE, samearmhi = 0.75, samearmlo = 0.25)
+cvrall(
+  clustername = NULL,
+  x,
+  categorical = NULL,
+  weights = NULL,
+  ntotal_cluster,
+  ntrt_cluster,
+  cutoff = 0.1,
+  numschemes = NULL,
+  size = 50000,
+  stratify = NULL,
+  seed = NULL,
+  balancemetric = "l2",
+  nosim = FALSE,
+  savedata = NULL,
+  bhist = TRUE,
+  check_validity = FALSE,
+  samearmhi = 0.75,
+  samearmlo = 0.25
+)
 }
 \arguments{
 \item{clustername}{a vector specifying the identification variable of the cluster. If no cluster identification variable is specified, the default is to label the clusters based on the order in which they appear.}
@@ -23,11 +38,11 @@ cvrall(clustername = NULL, x, categorical = NULL, weights = NULL,
 
 \item{ntrt_cluster}{the number of clusters that the researcher wants to assign to the treatment arm. It must be a positive integer less than the total number of clusters.}
 
-\item{cutoff}{quantile cutoff of the distribution of balance score below which a randomization scheme is sampled. Its default is \code{0.1}, and it must be between 0 and 1. The \code{cutoff} option is overriden by the \code{numschemes} option.}
+\item{cutoff}{quantile cutoff of the distribution of balance score below which a randomization scheme is sampled. Its default is \code{0.1}, and it must be between 0 and 1. The \code{cutoff} option is overridden by the \code{numschemes} option.}
 
 \item{numschemes}{number of randomization schemes to form the constrained space for the final randomization scheme to be selected. If specified, it overrides the option \code{cutoff} and the program will randomly sample the final randomization scheme from the constrained space of randomization schemes with the \code{numschemes} smallest balance scores. It must be a positive integer.}
 
-\item{size}{number of randomization schemes to simulate if the number of all possible randomization schemes is over \code{size}. Its default is \code{50,000}, and must be a positive integer. It can be overriden by the \code{nosim} option.}
+\item{size}{number of randomization schemes to simulate if the number of all possible randomization schemes is over \code{size}. Its default is \code{50,000}, and must be a positive integer. It can be overridden by the \code{nosim} option.}
 
 \item{stratify}{categorical variables on which to stratify the randomization. It overrides the option \code{weights} when specified. This list of categorical variables should be a subset of the \code{categorical} option if specified.}
 
@@ -37,15 +52,15 @@ cvrall(clustername = NULL, x, categorical = NULL, weights = NULL,
 
 \item{nosim}{if \code{TRUE}, it overrides the default procedure of simulating when the number of all possible randomization schemes is over the \code{size}, and the program enumerates all randomization schemes. Note: this may consume a lot of memory and cause R to crash}
 
-\item{savedata}{saves the data set of the constrained randomization space in a csv file if specified by string. The first column of the csv file is an indicator variable of the final randomization scheme in the constrained space. The constrained randomization space will be needed for analysis after the cluster randomized trial is completed if the clustered permutation test is used.}
+\item{savedata}{saves the data set of the constrained randomization space in a csv file if specified by \code{savedata}. The first column of the csv file is an indicator variable of the final randomization scheme in the constrained space. The constrained randomization space will be needed for analysis after the cluster randomized trial is completed if the clustered permutation test is used.}
 
 \item{bhist}{if \code{TRUE} of the default value, it produces the histogram of all balance scores with a red line on the graph indicating the selected cutoff.}
 
 \item{check_validity}{boolean argument to check the randomization validity or not}
 
-\item{samearmhi}{clusters assigned to the same arm as least this often are taken. The default is 0.75.}
+\item{samearmhi}{clusters assigned to the same arm as least this often are displayed. The default is \code{0.75}.}
 
-\item{samearmlo}{clusters assigned to the same arm at most this often are displayed. The default is 0.25.}
+\item{samearmlo}{clusters assigned to the same arm at most this often are displayed. The default is \code{0.25}.}
 }
 \value{
 \code{balancemetric} the balance metric used
@@ -62,13 +77,13 @@ cvrall(clustername = NULL, x, categorical = NULL, weights = NULL,
 
 \code{choice_message} the statement about the selected scheme from constrained randomization
 
-\code{data_CR} the data frame containing the allocation scheme, the clustername as well as the original data frame of covariates
+\code{data_CR} the data frame containing the allocation scheme, the \code{clustername}, and the original data frame of covariates
 
 \code{baseline_table} the descriptive statistics for all the variables by the two arms from the selected scheme
 
 \code{cluster_coincidence} cluster coincidence matrix
 
-\code{cluster_coin_des} cluster coincedence descriptive
+\code{cluster_coin_des} cluster coincidence descriptive
 
 \code{clusters_always_pair} pairs of clusters always allocated to the same arm.
 
@@ -81,16 +96,17 @@ cvrall(clustername = NULL, x, categorical = NULL, weights = NULL,
 \code{overall_allocations} frequency of acceptable overall allocations.
 }
 \description{
-cvcrand performs constrained randomization for cluster randomized
+\code{cvrall} performs constrained randomization for cluster randomized
 trials (CRTs), especially suited for CRTs with a small number of clusters. In constrained randomization,
 a randomization scheme is randomly sampled from a subset of all possible randomization schemes
-based on the value of a balancing criterion called a balance score. The \code{cvcrand} function has two choices of "l1" and "l2" metrics for balance score.
+based on the value of a balancing criterion called a balance score. The \code{cvrall} function has two choices of "l1" and "l2" metrics for balance score.
 
-The \code{cvcrand} function enumerates all randomization schemes or chooses the unique ones among some simulated randomization schemes as specified by the user.
-Some cluster-level "continuous" or "categorical" covariates are then used to calculate the balance scores for the unique schemes. A subset of the randomization schemes is chosen based on user-specified cutoff of certain quantile of the distribution of the balance scores or based on a fixed number of schemes with the smallest balance scores. The \code{cvcrand} function
+The \code{cvrall} function enumerates all randomization schemes or chooses the unique ones among some simulated randomization schemes as specified by the user.
+Some cluster-level continuous or categorical covariates are then used to calculate the balance scores for the unique schemes. A subset of the randomization schemes is chosen based on a user-specified cutoff at a certain quantile of the distribution of the balance scores or based on a fixed number of schemes with the smallest balance scores. The \code{cvrall} function
 treats the subset as the constrained space of randomization schemes and samples one scheme from the constrained space as the final chosen scheme.
 }
 \examples{
+
 
 # cvrall examples
 
@@ -101,13 +117,14 @@ Design_result <- cvrall(clustername = Dickinson_design$county,
                          ntotal_cluster = 16,
                          ntrt_cluster = 8,
                          categorical = c("location", "incomecat"),
-                         savedata = "dickinson_constrained.csv",
+                         ###### Option to save the constrained space ######
+                         # savedata = "dickinson_constrained.csv",
                          bhist = TRUE,
                          cutoff = 0.1,
                          seed = 12345, 
                          check_validity = TRUE)
 
-# cvcrand example with weights specified
+# cvrall example with weights specified
 
 Design_result <- cvrall(clustername = Dickinson_design$county,
                          balancemetric = "l2",
@@ -149,7 +166,7 @@ Design_result <- cvrall(clustername = Dickinson_design$county,
                                      seed = 12345)
 
  # Stratification on income category
- #Two of the income categories contain an odd number of clusters
+ # Two of the income categories contain an odd number of clusters
  # Stratification is not strictly possible
 
  Design_stratified_inc_result <- cvrall(clustername = Dickinson_design$county,
@@ -179,10 +196,7 @@ Dickinson, L. M., Beaty, B., Fox, C., Pace, W., Dickinson, W. P., Emsermann, C.,
 Bailey, R.A. and Rowley, C.A., 1987. Valid randomization. Proceedings of the Royal Society of London. A. Mathematical and Physical Sciences, 410(1838), pp.105-124.
 }
 \author{
-Hengshi Yu <hengshi@umich.edu>, John A. Gallis <john.gallis@duke.edu>, Fan Li <frank.li@duke.edu>, Elizabeth L. Turner <liz.turner@duke.edu>
+Hengshi Yu <hengshi@umich.edu>, Fan Li <fan.f.li@yale.edu>, John A. Gallis <john.gallis@duke.edu>, Elizabeth L. Turner <liz.turner@duke.edu>
 }
-\keyword{cluster}
-\keyword{covariate-constrained}
-\keyword{randomization}
-\keyword{randomized}
-\keyword{trails,}
+\keyword{cluster-randomized-trails}
+\keyword{covariate-constrained-randomization}

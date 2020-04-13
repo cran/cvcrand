@@ -9,4 +9,6 @@
 #'@importFrom graphics abline box hist mtext par title
 #'@importFrom stats as.formula glm lm model.matrix quantile sd residuals
 #'@importFrom utils combn read.csv write.csv capture.output
+#'@description cvcrand: A Package for Covariate-constrained Randomization and the Clustered Permutation Test for
+#'Cluster Randomized Trials
 NULL

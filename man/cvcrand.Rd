@@ -3,10 +3,10 @@
 \docType{package}
 \name{cvcrand}
 \alias{cvcrand}
-\alias{cvcrand-package}
 \title{cvcrand: a package for efficient design and analysis of cluster randomized trials}
 \description{
-cvcrand: a package for efficient design and analysis of cluster randomized trials
+cvcrand: A Package for Covariate-constrained Randomization and the Clustered Permutation Test for
+Cluster Randomized Trials
 }
 \section{cvcrand functions}{
 

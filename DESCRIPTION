@@ -1,12 +1,12 @@
 Package: cvcrand
 Type: Package
 Title: Efficient Design and Analysis of Cluster Randomized Trials
-Version: 0.0.4
-Date: 2019-3-25
+Version: 0.1.0
+Date: 2020-04-13
 Authors@R: c(person(given = "Hengshi", family = "Yu", role = c("aut", "cre"), 
              email="hengshi@umich.edu"), 
              person(given = "Fan", family = "Li", role ="aut", 
-             email = "frank.li@duke.edu"), 
+             email = "fan.f.li@yale.edu"), 
              person(given = "John A.", family = "Gallis", role ="aut", 
              email = "john.gallis@duke.edu"), 
              person(given = "Elizabeth L.", family = "Turner", role ="aut", 
@@ -20,19 +20,20 @@ Description: Constrained randomization by Raab and Butcher (2001) <doi:10.1002/1
             the individual outcome can then be analyzed through
             clustered permutation test introduced by Gail, et al. (1996) <doi:10.1002/(SICI)1097-0258(19960615)15:11%3C1069::AID-SIM220%3E3.0.CO;2-Q>. 
             Motivated from Li, et al. (2016) <doi:10.1002/sim.7410>, the package performs constrained randomization on the baseline
-            values of cluster-level covariates and cluster permutation test on the individual-level outcome for cluster randomized trials. 
+            values of cluster-level covariates and clustered permutation test on the individual-level outcomes for cluster randomized trials. 
 License: GPL (>= 2)
 LazyData: TRUE
 Depends: R (>= 3.4.0)
 Imports: tableone
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
-RoxygenNote: 6.1.0
+RoxygenNote: 7.1.0
+Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2019-03-25 16:30:46 UTC; hengshiyu
+Packaged: 2020-04-13 18:26:05 UTC; hengshiyu
 Author: Hengshi Yu [aut, cre],
   Fan Li [aut],
   John A. Gallis [aut],
   Elizabeth L. Turner [aut]
 Repository: CRAN
-Date/Publication: 2019-03-25 18:53:26 UTC
+Date/Publication: 2020-04-13 19:00:02 UTC

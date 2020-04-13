@@ -4,8 +4,14 @@
 \alias{cptest}
 \title{Clustered permutation test for cluster randomized trials}
 \usage{
-cptest(outcome, clustername, z = NULL, cspacedatname, outcometype,
-  categorical = NULL)
+cptest(
+  outcome,
+  clustername,
+  z = NULL,
+  cspacedatname,
+  outcometype,
+  categorical = NULL
+)
 }
 \arguments{
 \item{outcome}{a vector specifying the individual-level outcome.}
@@ -14,11 +20,11 @@ cptest(outcome, clustername, z = NULL, cspacedatname, outcometype,
 
 \item{z}{a data frame of covariates to be adjusted for in the permutation analysis.}
 
-\item{cspacedatname}{gives the string path of the csv dataset containing the saved randomization space. This dataset contains the permutation matrix, as well as an indicator variable in the first column indicating which row of the permutation matrix was selected as the final schemes to be implemented in practice.}
+\item{cspacedatname}{gives the path of the csv dataset containing the saved randomization space. This dataset contains the permutation matrix, as well as an indicator variable in the first column indicating which row of the permutation matrix was selected as the final scheme to be implemented in practice.}
 
 \item{outcometype}{the type of regression model that should be run. Options are \code{"continuous"} for linear regression and \code{"binary"} for logistic regression.}
 
-\item{categorical}{a vector specifying categorical (including binary) variables. This can be names of the columns or number indexes of columns, but cannot be both. Suppose there are \code{p} categories for a categorical variable, \code{cptest} function creates \code{p-1} dummy variables and drops the reference level if the variable is specified as a factor. Otherwise, the first level in the alphanumerical order will be dropped. If the user wants to specify a different level to drop for a \code{p}-level categorical variable, the user can create \code{p-1} dummy variables and these can instead be supplied as covariates to the \code{cptest} function. Then, the user needs to specify the dummy variables created themselves to be \code{categorical} when running \code{cptest}. In addition, the user could also set the variable as a factor with the specific reference level. The user must ensure that the same level of the categorical variable is excluded as was excluded when running \code{cvcrand}, by coding the variables the same way as in the design phase. This is the only optional argument of the \code{cptest} function. All others are required.}
+\item{categorical}{a vector specifying categorical (including binary) variables. This can be names of the columns or number indexes of columns, but cannot be both. Suppose there are \code{p} categories for a categorical variable, \code{cptest} function creates \code{(p-1)} dummy variables and drops the reference level if the variable is specified as a factor. Otherwise, the first level in the alphanumerical order will be dropped. If the user wants to specify a different level to drop for a \code{p}-level categorical variable, the user can create \code{p-1} dummy variables and these can instead be supplied as covariates to the \code{cptest} function. Then, the user needs to specify the dummy variables created themselves to be \code{categorical} when running \code{cptest}. In addition, the user could also set the variable as a factor with the specific reference level. The user must ensure that the same level of the categorical variable is excluded as was excluded when running \code{cvrall}, by coding the variables the same way as in the design phase. This is the only optional argument of the \code{cptest} function. All others are required.}
 }
 \value{
 \code{FinalScheme} the final scheme in the permutation matrix
@@ -28,12 +34,12 @@ cptest(outcome, clustername, z = NULL, cspacedatname, outcometype,
 \code{pvalue_statement} the statement about the p-value of the intervention effect from the clustered permutation test
 }
 \description{
-cptest performs clustered permutation test on the individual-level outcome data for cluster
-randomized trials (CRTs). The type of the outcome can be specified by the user to be "continuous" or
-"binary".
+cptest performs a clustered permutation test on the individual-level outcome data for cluster
+randomized trials (CRTs). The type of the outcome can be specified by the user to be \code{"continuous"} or
+\code{"binary"}.
 
-With specified outcome type being "continuous" or "binary", linear regression or logistic regression is applied on the outcome and the covariates specified for all individuals. Cluster residual means are computed. Within the constrained space,
-the contrast statistic is created from the randomization schemes and the cluster residual means. The permutation test is then conducted by comparing the contrast statistic for the scheme actually utilized to all other schemes in the constrained space.
+Linear regression (for outcome type \code{"continuous"}) or logistic regression (for outcome type \code{"binary"}) is applied to the outcome regressed on covariates specified. Cluster residual means are computed. Within the constrained space,
+the contrast statistic between the treatment and control arms is created from the randomization schemes and the cluster residual means. The permutation test is then conducted by comparing the contrast statistic for the scheme actually utilized to all other schemes in the constrained space.
 }
 \examples{
 \dontrun{
@@ -61,11 +67,7 @@ Gallis, J. A., Li, Fl. Yu, H., Turner, E. L. (2017).  cvcrand and cptest: Effici
 Dickinson, L. M., Beaty, B., Fox, C., Pace, W., Dickinson, W. P., Emsermann, C., & Kempe, A. (2015). Pragmatic cluster randomized trials using covariate constrained randomization: A method for practice-based research networks (PBRNs). The Journal of the American Board of Family Medicine, 28(5), 663-672.
 }
 \author{
-Hengshi Yu <hengshi@umich.edu>, John A. Gallis <john.gallis@duke.edu>, Fan Li <frank.li@duke.edu>, Elizabeth L. Turner <liz.turner@duke.edu>
+Hengshi Yu <hengshi@umich.edu>, Fan Li <fan.f.li@yale.edu>, John A. Gallis <john.gallis@duke.edu>, Elizabeth L. Turner <liz.turner@duke.edu>
 }
-\keyword{cluster}
-\keyword{clustered}
-\keyword{permutation}
-\keyword{randomized}
-\keyword{test,}
-\keyword{trails}
+\keyword{cluster-randomized-trails}
+\keyword{clustered-permutation-test}

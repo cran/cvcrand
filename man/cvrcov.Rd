@@ -2,12 +2,23 @@
 % Please edit documentation in R/cvrcov.R
 \name{cvrcov}
 \alias{cvrcov}
-\title{Covariate-constrained randomization for cluster randomized trials}
+\title{Covariate-by-covariate constrained randomization for cluster randomized trials}
 \usage{
-cvrcov(clustername = NULL, x, categorical = NULL, constraints,
-  ntotal_cluster, ntrt_cluster, size = 50000, seed = NULL,
-  nosim = FALSE, savedata = NULL, check_validity = FALSE,
-  samearmhi = 0.75, samearmlo = 0.25)
+cvrcov(
+  clustername = NULL,
+  x,
+  categorical = NULL,
+  constraints,
+  ntotal_cluster,
+  ntrt_cluster,
+  size = 50000,
+  seed = NULL,
+  nosim = FALSE,
+  savedata = NULL,
+  check_validity = FALSE,
+  samearmhi = 0.75,
+  samearmlo = 0.25
+)
 }
 \arguments{
 \item{clustername}{a vector specifying the identification variable of the cluster. If no cluster identification variable is specified, the default is to label the clusters based on the order in which they appear.}
@@ -16,7 +27,7 @@ cvrcov(clustername = NULL, x, categorical = NULL, constraints,
 
 \item{categorical}{a vector specifying categorical (including binary) variables. This can be names of the columns or number indexes of columns, but cannot be both. Suppose there are \code{p} categories for a categorical variable, \code{cvcrand} function creates \code{p-1} dummy variables and drops the reference level if the variable is specified as a factor. Otherwise, the first level in the alphanumerical order will be dropped. The results are sensitive to which level is excluded. If the user wants to specify a different level to drop for a \code{p}-level categorical variable, the user can create \code{p-1} dummy variables and these can instead be supplied as covariates to the \code{cvcrand} function. Then, the user needs to specify the dummy variables created to be \code{categorical} when running \code{cvcrand}. In addition, the user could also set the variable as a factor with the specific reference level. If the \code{weights} option is used, the weights for a categorical variable will be replicated on all the dummy variables created.}
 
-\item{constraints}{a vector of user-specified constraints for all covariates. \code{"any"} means no constraints. If not \code{"any"}, the first character letter of \code{"m"} denotes absolute mean difference, and \code{"s"} means absolute sum difference. If the second character is \code{"f"}, the previous metric is constrained to be smaller or equal to the fraction with the number followed of the overall mean for \code{"m"} or mean arm total for \code{"s"}. If not \code{"f"} at the second character, the metric is just constrained to be smaller or equal to the value followed.}
+\item{constraints}{a vector of user-specified constraints for all covariates. \code{"any"} means no constraints. If not \code{"any"}, the first character letter of \code{"m"} denotes absolute mean difference, and \code{"s"} means absolute sum difference. If the second character is \code{"f"}, the previous metric is constrained to be smaller or equal to the fraction with the number followed of the overall mean for \code{"m"} or mean arm total for \code{"s"}. If not \code{"f"} at the second character, the metric is just constrained to be smaller or equal to the value following letter(s).}
 
 \item{ntotal_cluster}{the total number of clusters to be randomized. It must be a positive integer and equal to the number of rows of the data.}
 
@@ -26,15 +37,15 @@ cvrcov(clustername = NULL, x, categorical = NULL, constraints,
 
 \item{seed}{seed for simulation and random sampling. It is needed so that the randomization can be replicated. Its default is \code{12345}.}
 
-\item{nosim}{if TRUE, it overrides the default procedure of simulating when the number of all possible randomization schemes is over the \code{size}, and the program enumerates all randomization schemes. Note: this may consume a lot of memory and cause R to crash}
+\item{nosim}{if TRUE, it overrides the default procedure of simulating when the number of all possible randomization schemes is over \code{size}, and the program enumerates all randomization schemes. Note: this may consume a lot of memory and cause R to crash}
 
-\item{savedata}{saves the data set of the constrained randomization space in a csv file if specified by string. The first column of the csv file is an indicator variable of the final randomization scheme in the constrained space. The constrained randomization space will be needed for analysis after the cluster randomized trial is completed if the clustered permutation test is used.}
+\item{savedata}{saves the data set of the constrained randomization space in a csv file if specified by \code{savedata}. The first column of the csv file is an indicator variable of the final randomization scheme in the constrained space. The constrained randomization space will be needed for analysis after the cluster randomized trial is completed if the clustered permutation test is used.}
 
 \item{check_validity}{boolean argument to check the randomization validity or not}
 
-\item{samearmhi}{clusters assigned to the same arm as least this often are taken. The default is 0.75.}
+\item{samearmhi}{clusters assigned to the same arm as least this often are displayed. The default is \code{0.75}.}
 
-\item{samearmlo}{clusters assigned to the same arm at most this often are displayed. The default is 0.25.}
+\item{samearmlo}{clusters assigned to the same arm at most this often are displayed. The default is \code{0.25}.}
 }
 \value{
 \code{allocation} the allocation scheme from constrained randomization
@@ -43,13 +54,13 @@ cvrcov(clustername = NULL, x, categorical = NULL, constraints,
 
 \code{scheme_message} the statement about how to get the whole randomization space to use in constrained randomization
 
-\code{data_CR} the data frame containing the allocation scheme, the clustername as well as the original data frame of covariates
+\code{data_CR} the data frame containing the allocation scheme, the \code{clustername}, and the original data frame of covariates
 
 \code{baseline_table} the descriptive statistics for all the variables by the two arms from the selected scheme
 
 \code{cluster_coincidence} cluster coincidence matrix
 
-\code{cluster_coin_des} cluster coincedence descriptive
+\code{cluster_coin_des} cluster coincidence descriptive
 
 \code{clusters_always_pair} pairs of clusters always allocated to the same arm.
 
@@ -64,7 +75,7 @@ cvrcov(clustername = NULL, x, categorical = NULL, constraints,
 \code{overall_summary} summary of covariates with constraints in the constrained space
 }
 \description{
-cvrcov performs covariate-by-covariate constrained randomization for cluster randomized
+\code{cvrcov} performs covariate-by-covariate constrained randomization for cluster randomized
 trials (CRTs), especially suited for CRTs with a small number of clusters. In constrained randomization,
 a randomization scheme is randomly sampled from a subset of all possible randomization schemes
 based on the constraints on each covariate. 
@@ -74,6 +85,7 @@ A subset of the randomization schemes is chosen based on user-specified covariat
 of randomization schemes and samples one scheme from the constrained space as the final chosen scheme.
 }
 \examples{
+
 
 # cvrcov example
 
@@ -86,9 +98,11 @@ Design_cov_result <- cvrcov(clustername = Dickinson_design_numeric$county,
                             ntrt_cluster = 8,
                             constraints = c("s5", "mf.5", "any", "mf0.2", "mf0.2"), 
                             categorical = c("location"),
-                            savedata = "dickinson_cov_constrained.csv",
+                            ###### Option to save the constrained space ######
+                            # savedata = "dickinson_cov_constrained.csv",
                             seed = 12345, 
                             check_validity = TRUE)
+
 
 }
 \references{
@@ -107,11 +121,7 @@ Bailey, R.A. and Rowley, C.A., 1987. Valid randomization. Proceedings of the Roy
 Greene, E.J., 2017. A SAS macro for covariate-constrained randomization of general cluster-randomized and unstratified designs. Journal of statistical software, 77(CS1).
 }
 \author{
-Hengshi Yu <hengshi@umich.edu>, Fan Li <frank.li@duke.edu>, John A. Gallis <john.gallis@duke.edu>, Elizabeth L. Turner <liz.turner@duke.edu>
+Hengshi Yu <hengshi@umich.edu>, Fan Li <fan.f.li@yale.edu>, John A. Gallis <john.gallis@duke.edu>, Elizabeth L. Turner <liz.turner@duke.edu>
 }
-\keyword{cluster}
-\keyword{constrained}
-\keyword{covariate-by-covariate}
-\keyword{randomization}
-\keyword{randomized}
-\keyword{trails,}
+\keyword{cluster-randomized-trails}
+\keyword{covariate-by-covariate-constrained-randomization}

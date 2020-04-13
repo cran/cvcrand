@@ -1,20 +1,20 @@
-#' Covariate-constrained randomization for cluster randomized trials
+#' Covariate-by-covariate constrained randomization for cluster randomized trials
 #' @param clustername a vector specifying the identification variable of the cluster. If no cluster identification variable is specified, the default is to label the clusters based on the order in which they appear.
 #' @param x a data frame specifying the values of cluster-level covariates to balance. With K covariates and n clusters, it will be dimension of \code{n} by \code{K}.
 #' @param categorical a vector specifying categorical (including binary) variables. This can be names of the columns or number indexes of columns, but cannot be both. Suppose there are \code{p} categories for a categorical variable, \code{cvcrand} function creates \code{p-1} dummy variables and drops the reference level if the variable is specified as a factor. Otherwise, the first level in the alphanumerical order will be dropped. The results are sensitive to which level is excluded. If the user wants to specify a different level to drop for a \code{p}-level categorical variable, the user can create \code{p-1} dummy variables and these can instead be supplied as covariates to the \code{cvcrand} function. Then, the user needs to specify the dummy variables created to be \code{categorical} when running \code{cvcrand}. In addition, the user could also set the variable as a factor with the specific reference level. If the \code{weights} option is used, the weights for a categorical variable will be replicated on all the dummy variables created.
-#' @param constraints a vector of user-specified constraints for all covariates. \code{"any"} means no constraints. If not \code{"any"}, the first character letter of \code{"m"} denotes absolute mean difference, and \code{"s"} means absolute sum difference. If the second character is \code{"f"}, the previous metric is constrained to be smaller or equal to the fraction with the number followed of the overall mean for \code{"m"} or mean arm total for \code{"s"}. If not \code{"f"} at the second character, the metric is just constrained to be smaller or equal to the value followed. 
+#' @param constraints a vector of user-specified constraints for all covariates. \code{"any"} means no constraints. If not \code{"any"}, the first character letter of \code{"m"} denotes absolute mean difference, and \code{"s"} means absolute sum difference. If the second character is \code{"f"}, the previous metric is constrained to be smaller or equal to the fraction with the number followed of the overall mean for \code{"m"} or mean arm total for \code{"s"}. If not \code{"f"} at the second character, the metric is just constrained to be smaller or equal to the value following letter(s). 
 #' @param ntotal_cluster the total number of clusters to be randomized. It must be a positive integer and equal to the number of rows of the data.
 #' @param ntrt_cluster  the number of clusters that the researcher wants to assign to the treatment arm. It must be a positive integer less than the total number of clusters.
 #' @param size number of randomization schemes to simulate if the number of all possible randomization schemes is over \code{size}. Its default is \code{50,000}, and must be a positive integer. It can be overriden by the \code{nosim} option.
 #' @param seed seed for simulation and random sampling. It is needed so that the randomization can be replicated. Its default is \code{12345}.
-#' @param nosim if TRUE, it overrides the default procedure of simulating when the number of all possible randomization schemes is over the \code{size}, and the program enumerates all randomization schemes. Note: this may consume a lot of memory and cause R to crash
-#' @param savedata saves the data set of the constrained randomization space in a csv file if specified by string. The first column of the csv file is an indicator variable of the final randomization scheme in the constrained space. The constrained randomization space will be needed for analysis after the cluster randomized trial is completed if the clustered permutation test is used.
+#' @param nosim if TRUE, it overrides the default procedure of simulating when the number of all possible randomization schemes is over \code{size}, and the program enumerates all randomization schemes. Note: this may consume a lot of memory and cause R to crash
+#' @param savedata saves the data set of the constrained randomization space in a csv file if specified by \code{savedata}. The first column of the csv file is an indicator variable of the final randomization scheme in the constrained space. The constrained randomization space will be needed for analysis after the cluster randomized trial is completed if the clustered permutation test is used.
 #' @param check_validity boolean argument to check the randomization validity or not
-#' @param samearmhi clusters assigned to the same arm as least this often are taken. The default is 0.75. 
-#' @param samearmlo clusters assigned to the same arm at most this often are displayed. The default is 0.25. 
-#' @keywords cluster randomized trails, covariate-by-covariate constrained randomization
-#' @author Hengshi Yu <hengshi@umich.edu>, Fan Li <frank.li@duke.edu>, John A. Gallis <john.gallis@duke.edu>, Elizabeth L. Turner <liz.turner@duke.edu>
-#' @description cvrcov performs covariate-by-covariate constrained randomization for cluster randomized
+#' @param samearmhi clusters assigned to the same arm as least this often are displayed. The default is \code{0.75}. 
+#' @param samearmlo clusters assigned to the same arm at most this often are displayed. The default is \code{0.25}. 
+#' @keywords cluster-randomized-trails covariate-by-covariate-constrained-randomization
+#' @author Hengshi Yu <hengshi@umich.edu>, Fan Li <fan.f.li@yale.edu>, John A. Gallis <john.gallis@duke.edu>, Elizabeth L. Turner <liz.turner@duke.edu>
+#' @description \code{cvrcov} performs covariate-by-covariate constrained randomization for cluster randomized
 #' trials (CRTs), especially suited for CRTs with a small number of clusters. In constrained randomization,
 #' a randomization scheme is randomly sampled from a subset of all possible randomization schemes
 #' based on the constraints on each covariate. 
@@ -40,6 +40,7 @@
 #' @export
 #' @examples
 #'
+#' 
 #' # cvrcov example
 #'
 #' Dickinson_design_numeric <- Dickinson_design
@@ -51,17 +52,19 @@
 #'                             ntrt_cluster = 8,
 #'                             constraints = c("s5", "mf.5", "any", "mf0.2", "mf0.2"), 
 #'                             categorical = c("location"),
-#'                             savedata = "dickinson_cov_constrained.csv",
+#'                             ###### Option to save the constrained space ######
+#'                             # savedata = "dickinson_cov_constrained.csv",
 #'                             seed = 12345, 
 #'                             check_validity = TRUE)
-#'
+#' 
+#' 
 #' @return \code{allocation} the allocation scheme from constrained randomization
 #' @return \code{assignment_message} the statement about how many clusters to be randomized to the intervention and the control arms respectively
 #' @return \code{scheme_message} the statement about how to get the whole randomization space to use in constrained randomization
-#' @return \code{data_CR} the data frame containing the allocation scheme, the clustername as well as the original data frame of covariates
+#' @return \code{data_CR} the data frame containing the allocation scheme, the \code{clustername}, and the original data frame of covariates
 #' @return \code{baseline_table} the descriptive statistics for all the variables by the two arms from the selected scheme
 #' @return \code{cluster_coincidence} cluster coincidence matrix
-#' @return \code{cluster_coin_des} cluster coincedence descriptive
+#' @return \code{cluster_coin_des} cluster coincidence descriptive
 #' @return \code{clusters_always_pair} pairs of clusters always allocated to the same arm.
 #' @return \code{clusters_always_not_pair} pairs of clusters always allocated to different arms.
 #' @return \code{clusters_high_pair}  pairs of clusters randomized to the same arm at least \code{samearmhi} of the time.
