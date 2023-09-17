@@ -342,7 +342,7 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
     pmt <- matrix(NA, R, nsub)         # indicating clusters to get the treatment
     S <- R
 
-    for (r in 1:R){
+    for (r in 1:R) {
       pmt[r, emr[r, ]] <- 1
       pmt[r, -emr[r, ]] <- 0
     }
@@ -355,7 +355,7 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
           BL <- apply(abs((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE)))), 1, sum)
           # l1 norm B score: if there are no weights specified, the default weights are the standard deviations
 
-      } else if (balancemetric=="l2") {
+      } else if (balancemetric == "l2") {
         BL <- apply(((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE))))^2, 1, sum)
       # l2 norm B score: if there are no weights specified, the default weights are the variances
 
@@ -363,7 +363,7 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
 
       } else {
 
-      if (balancemetric =="l1") {
+      if (balancemetric == "l1") {
 
        BL <- apply(abs((pmt %*% ((x - matrix(apply(x, 2, mean), nsub, np, byrow = TRUE)) * matrix(weights, nsub, np, byrow = TRUE) / matrix(apply(x, 2, sd), nsub, np, byrow = TRUE)))), 1, sum)
       # l1 norm B score: if there are weights specified
@@ -593,7 +593,7 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
 
 
 
-  if (!is.null(savedata)){
+  if (!is.null(savedata)) {
 
     SchemeChosen <- rep(0, dim(pmt)[1])
 
@@ -606,10 +606,10 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
       # output the schemes' matrix of pmt
 
 
-  if (bhist){
+  if (bhist) {
 
 
-    if(sim == 1){
+    if (sim == 1) {
 
       par(mar = c(4, 3, 1.5, 1))
 
@@ -661,14 +661,14 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
 
 
   coin_matrix <- coin_descri <- al_clusters <- alno_clusters  <- hi_clusters <- lo_clusters <- NULL
-  if(check_validity){
+  if (check_validity) {
       
       n_pair <- t(combn(nsub, 2))      # all the schemes
 
       same_arm_count <- same_arm_frac <- diff_arm_count <- diff_arm_frac <- rep(NA, dim(n_pair)[1])
       
-      for(j in 1:(nsub-1)){
-        for(k in (j+1):nsub){
+      for (j in 1:(nsub - 1)) {
+        for (k in (j + 1):nsub) {
           same_arm <- sum((qmt[,j] - qmt[, k]) == 0)
           diff_arm <-  R_result - same_arm
           same_prop <- round(same_arm/R_result, 4)
@@ -692,10 +692,10 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
       
       
       # Always togerther
-      if(sum(same_arm_frac == 1) > 0){
+      if (sum(same_arm_frac == 1) > 0) {
         alto_index <- which(same_arm_frac == 1)
         alto_clt_pair <- c()
-        for(t in 1:length(alto_index)){
+        for (t in 1:length(alto_index)) {
           clt_index <- alto_index[t]
           alto_clts <- paste0(first_cluster[clt_index], " and ", second_cluster[clt_index])
           alto_clt_pair <- c(alto_clt_pair, alto_clts)
@@ -708,10 +708,10 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
       }
 
       # Always not together
-      if(sum(same_arm_frac == 0) > 0){
+      if (sum(same_arm_frac == 0) > 0) {
         alnoto_index <- which(same_arm_frac == 0)
         alnoto_clt_pair <- c()
-        for(t in 1:length(alnoto_index)){
+        for (t in 1:length(alnoto_index)) {
           clt_index <- alnoto_index[t]
           alnoto_clts <- paste0(first_cluster[clt_index], " and ", second_cluster[clt_index])
           alnoto_clt_pair <- c(alnoto_clt_pair, alnoto_clts)
@@ -725,10 +725,10 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
       
       
       # user specify upper bound
-      if(sum(same_arm_frac >= samearmhi) > 0){
+      if (sum(same_arm_frac >= samearmhi) > 0) {
         hi_index <- which(same_arm_frac >= samearmhi)
         hi_pair <- c()
-        for(t in 1:length(hi_index)){
+        for (t in 1:length(hi_index)) {
           clt_index <- hi_index[t]
           hi_cluts <- paste0(first_cluster[clt_index], " and ", second_cluster[clt_index])
           hi_pair <- c(hi_pair, hi_cluts)
@@ -742,10 +742,10 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
       }
       
       # user specified lower bound
-      if(sum(same_arm_frac <= samearmlo) > 0){
+      if (sum(same_arm_frac <= samearmlo) > 0) {
         lo_index <- which(same_arm_frac <= samearmlo)
         lo_pair <- c()
-        for(t in 1:length(lo_index)){
+        for (t in 1:length(lo_index)) {
           clt_index <- lo_index[t]
           lo_cluts <- paste0(first_cluster[clt_index], " and ", second_cluster[clt_index])
           lo_pair <- c(lo_pair, lo_cluts)
@@ -809,7 +809,7 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
     assignment_message <- paste("You have indicated that you want to assign", ntrt_cluster, "clusters to treatment", "and", ntotal_cluster - ntrt_cluster, "to control")
 
     # indicate a enumeration process or a simulation process with the detailed number of schemes
-    if(sim == 1){
+    if (sim == 1) {
 
              scheme_message<-paste("Simulating", S, "schemes with", R, "unique schemes for", ntrt_cluster, "clusters in the treatment arm out of", ntotal_cluster, "clusters in total")
 
@@ -841,10 +841,10 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
 
      colnames(data_merge)[1] <- "arm"
 
-     if(!is.null(categorical)){
+     if (!is.null(categorical)) { 
      # put the categorical variables into factors to prepare for the "CreateTableOne" function
 
-        if(is.character(categorical)){
+        if (is.character(categorical)) {
                    varsToFactor <- categorical
          # if the categorical variables' names have been specified, these are the names in the data frame for the variables to be processed to be factors.
 
@@ -869,21 +869,21 @@ cvrall = function(clustername = NULL, x, categorical = NULL, weights = NULL, nto
      colnames(DS)[1:2] <- c("arm = 0", "arm = 1")
 
   return(list(balancemetric = balancemetric,
-             allocation = allocation,
-             bscores = BL_Quantiles,
-             assignment_message = assignment_message,
-             scheme_message = scheme_message,
-             cutoff_message = cutoff_message,
-             choice_message = choice_message,
-             data_CR = data_merge,
-             baseline_table = DS, 
-             cluster_coincidence = coin_matrix, 
-             cluster_coin_des = coin_descri, 
-             clusters_always_pair = al_clusters, 
-             clusters_always_not_pair = alno_clusters, 
-             clusters_high_pair = hi_clusters, 
-             clusters_low_pair = lo_clusters, 
-             overall_allocations = summary_constraints))
+              allocation = allocation,
+              bscores = BL_Quantiles,
+              assignment_message = assignment_message,
+              scheme_message = scheme_message,
+              cutoff_message = cutoff_message,
+              choice_message = choice_message,
+              data_CR = data_merge,
+              baseline_table = DS, 
+              cluster_coincidence = coin_matrix, 
+              cluster_coin_des = coin_descri, 
+              clusters_always_pair = al_clusters, 
+              clusters_always_not_pair = alno_clusters, 
+              clusters_high_pair = hi_clusters, 
+              clusters_low_pair = lo_clusters, 
+              overall_allocations = summary_constraints))
 
   ## return the allocations, number of schemes, cutoff and choice messages, resulted arms comparisons from BL
 

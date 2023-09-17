@@ -11,4 +11,6 @@
 #'@importFrom utils combn read.csv write.csv capture.output
 #'@description cvcrand: A Package for Covariate-constrained Randomization and the Clustered Permutation Test for
 #'Cluster Randomized Trials
-NULL
+#' @keywords internal
+"_PACKAGE"
+

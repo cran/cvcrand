@@ -80,7 +80,7 @@ if (!is.null(seed)) {
       set.seed(12345)
       } ##default seed to be 12345
 
-  if(is.null(clustername)){
+  if (is.null(clustername)) {
 
     clustername <- 1:dim(x)[1]
 
@@ -190,11 +190,12 @@ if (!is.null(seed)) {
 
       np <- dim(x)[2]      # number of covariates for constrained randomization
 
-  if(length(constraints) != np){
+  if (length(constraints) != np) {
 
     stop("Error: constraints should be matched with all variables")
   
   }
+  
 id = clustername
 n = ntotal_cluster
 ntrt = ntrt_cluster
@@ -239,61 +240,65 @@ if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there a
   use_fraction_or_not = 1 * (fraction_or_not == "f")
 
   sat_num = R
-  for(i in 1:length(constraints)){  
-    if(any_or_not[i] == 0){
-      if(constraints_list[i] == "m"){
+  for (i in 1:length(constraints)) {  
+
+    if (any_or_not[i] == 0) {
+      
+      if (constraints_list[i] == "m") {
         BL_means <- abs(mumt %*% as.matrix(x[,i]))
-        if(use_fraction_or_not[i] == 1){ 
+        if (use_fraction_or_not[i] == 1) { 
           BL_omean <- omumt %*% as.matrix(x[,i])
           sat_list <- c(1 * (BL_means <= constraints_value[i] * BL_omean))
-        }else{
+        } else {
           sat_list <- c(1 * (BL_means <= constraints_value[i]))
         }
-      }else if(constraints_list[i] == "s"){
+      } else if (constraints_list[i] == "s") {
         BL_sums <- abs((pmt %*% as.matrix(x[,i])))
-        if(use_fraction_or_not[i] == 1){
+        if (use_fraction_or_not[i] == 1) {
           BL_osum <- omt %*% as.matrix(x[,i])
           sat_list <- c(1 * (BL_sums <= constraints_value[i] * BL_osum))
-        }else{
+        } else {
           sat_list <- c(1 * (BL_sums <= constraints_value[i]))
         }
       }
     }
     sat_num = sum(sat_list)
-    if(sat_num > 0){
+    if (sat_num > 0) {
+
       omt <- omt[which(sat_list == 1), ]
       omumt <- omumt[which(sat_list == 1), ]
       pmt <- pmt[which(sat_list == 1), ]
       mumt <- mumt[which(sat_list == 1), ]
       qmt <- qmt[which(sat_list == 1), ]
-    }else{
+      
+    } else {
       stop("Error: there is not any scheme that satifies the constraints.")
     }   
   }
 
-  if(!is.null(categorical)){
+  if (!is.null(categorical)) {
     if(is.character(categorical)){
       cat_index <- which(colnames(x) %in% categorical)
-    }else if(is.numeric(categorical)){
+    } else if (is.numeric(categorical)) {
       cat_index <- categorical
     }
-  }else{
+  } else {
     cat_index = c()
   }
   
   
   report_list <- list()
-  for(i in 1:length(constraints)){  
-    if(any_or_not[i] == 0){
-      if(constraints_list[i] == "m"){
+  for (i in 1:length(constraints)) {  
+    if (any_or_not[i] == 0) {
+      if (constraints_list[i] == "m") {
         report_i <- abs(mumt %*% as.matrix(x[,i]))
-      }else if(constraints_list[i] == "s"){
+      } else if (constraints_list[i] == "s") {
         report_i <- abs((pmt %*% as.matrix(x[,i])))
       }
-      if(!i %in% cat_index){
+      if (!i %in% cat_index) {
         report_ilist <- quantile(report_i, prob = c(0, 0.25, 0.5, 0.75, 1))
         names(report_ilist) <- c("Minimum", "25th Pctl", "Median", "75th Pctl", "Maximum")
-      }else{
+      } else {
         report_ilist <- as.data.frame(table(report_i))
         colnames(report_ilist) <- c("difference", "frequency")
       }
@@ -311,7 +316,7 @@ if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there a
 
   inter <- qmt[rw, ]
 
-  }else{
+  } else {
 
     sim <- 1
     # indicate simulation
@@ -321,7 +326,7 @@ if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there a
     qmt <- matrix(NA, S, nsub)
 
 
-    for(s in 1:S){
+    for (s in 1:S) {
 
       trt <- sample(1:nsub, ntrt)
             
@@ -335,7 +340,7 @@ if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there a
   
     pmt <-  omt <- mumt <- omumt <- matrix(NA, R, nsub)
 
-    for(s in 1:R){
+    for (s in 1:R) {
 
 
       trt <- which(qmt[s, ] == 1)
@@ -362,60 +367,60 @@ if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there a
   use_fraction_or_not = 1 * (fraction_or_not == "f")
 
   sat_num = R
-  for(i in 1:length(constraints)){  
-    if(any_or_not[i] == 0){
-      if(constraints_list[i] == "m"){
+  for (i in 1:length(constraints)) {  
+    if (any_or_not[i] == 0) {
+      if (constraints_list[i] == "m") {
         BL_means <- abs(mumt %*% as.matrix(x[,i]))
-        if(use_fraction_or_not[i] == 1){ 
+        if (use_fraction_or_not[i] == 1) { 
           BL_omean <- omumt %*% as.matrix(x[,i])
           sat_list <- c(1 * (BL_means <= constraints_value[i] * BL_omean))
-        }else{
+        } else {
           sat_list <- c(1 * (BL_means <= constraints_value[i]))
         }
-      }else if(constraints_list[i] == "s"){
+      } else if (constraints_list[i] == "s") {
         BL_sums <- abs((pmt %*% as.matrix(x[,i])))
-        if(use_fraction_or_not[i] == 1){
+        if (use_fraction_or_not[i] == 1) {
           BL_osum <- omt %*% as.matrix(x[,i])
           sat_list <- c(1 * (BL_sums <= constraints_value[i] * BL_osum))
-        }else{
+        } else {
           sat_list <- c(1 * (BL_sums <= constraints_value[i]))
         }
       }
     }
     sat_num = sum(sat_list)
-    if(sat_num > 0){
+    if (sat_num > 0) {
       omt <- omt[which(sat_list == 1), ]
       omumt <- omumt[which(sat_list == 1), ]
       pmt <- pmt[which(sat_list == 1), ]
       mumt <- mumt[which(sat_list == 1), ]
       qmt <- qmt[which(sat_list == 1), ]
-    }else{
+    } else {
       stop("Error: there is not any scheme that satifies the constraints.")
     }   
   }
 
-  if(!is.null(categorical)){
-      if(is.character(categorical)){
+  if (!is.null(categorical)) {
+      if (is.character(categorical)) {
         cat_index <- which(colnames(x) %in% categorical)
-      }else if(is.numeric(categorical)){
+      } else if (is.numeric(categorical)) {
         cat_index <- categorical
       }
-    }else{
+    } else {
       cat_index = c()
     }
 
   report_list <- list()
-  for(i in 1:length(constraints)){  
-    if(any_or_not[i] == 0){
-      if(constraints_list[i] == "m"){
+  for (i in 1:length(constraints)) {  
+    if (any_or_not[i] == 0) {
+      if (constraints_list[i] == "m") {
         report_i <- abs(mumt %*% as.matrix(x[,i]))
-      }else if(constraints_list[i] == "s"){
+      } else if (constraints_list[i] == "s") {
         report_i <- abs((pmt %*% as.matrix(x[,i])))
       }
-      if(!i %in% cat_index){
+      if (!i %in% cat_index) {
         report_ilist <- quantile(report_i, prob = c(0, 0.25, 0.5, 0.75, 1))
         names(report_ilist) <- c("Minimum", "25th Pctl", "Median", "75th Pctl", "Maximum")
-      }else{
+      } else {
         report_ilist <- as.data.frame(table(report_i))
         colnames(report_ilist) <- c("difference", "frequency")
       }
@@ -434,7 +439,7 @@ if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there a
    
   }
 
-  if (!is.null(savedata)){
+  if (!is.null(savedata)) {
 
     SchemeChosen <- rep(0, dim(qmt)[1])
 
@@ -446,14 +451,14 @@ if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there a
   }
 
   coin_matrix <- coin_descri <- al_clusters <- alno_clusters  <- hi_clusters <- lo_clusters <- NULL
-  if(check_validity){
+  if (check_validity) {
       
       n_pair <- t(combn(nsub, 2))      # all the schemes
 
       same_arm_count <- same_arm_frac <- diff_arm_count <- diff_arm_frac <- rep(NA, dim(n_pair)[1])
       
-      for(j in 1:(nsub-1)){
-        for(k in (j+1):nsub){
+      for (j in 1:(nsub - 1)) {
+        for (k in (j + 1):nsub) {
           same_arm <- sum((qmt[,j] - qmt[, k]) == 0)
           diff_arm <-  R_result - same_arm
           same_prop <- round(same_arm/R_result, 4)
@@ -469,18 +474,18 @@ if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there a
       first_cluster <- id[n_pair[,1]]
       second_cluster <- id[n_pair[,2]]
       coin_matrix <- as.data.frame(cbind(first_cluster, 
-                                  second_cluster, 
-                                  same_arm_count, 
-                                  paste0(same_arm_frac * 100, "%"), 
-                                  diff_arm_count, 
-                                  paste0(diff_arm_frac * 100, "%")))
+                                   second_cluster, 
+                                   same_arm_count, 
+                                   paste0(same_arm_frac * 100, "%"), 
+                                   diff_arm_count, 
+                                   paste0(diff_arm_frac * 100, "%")))
       
       
       # Always togerther
-      if(sum(same_arm_frac == 1) > 0){
+      if (sum(same_arm_frac == 1) > 0) {
         alto_index <- which(same_arm_frac == 1)
         alto_clt_pair <- c()
-        for(t in 1:length(alto_index)){
+        for (t in 1:length(alto_index)) {
           clt_index <- alto_index[t]
           alto_clts <- paste0(first_cluster[clt_index], " and ", second_cluster[clt_index])
           alto_clt_pair <- c(alto_clt_pair, alto_clts)
@@ -493,10 +498,10 @@ if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there a
       }
 
       # Always not together
-      if(sum(same_arm_frac == 0) > 0){
+      if (sum(same_arm_frac == 0) > 0) {
         alnoto_index <- which(same_arm_frac == 0)
         alnoto_clt_pair <- c()
-        for(t in 1:length(alnoto_index)){
+        for (t in 1:length(alnoto_index)) {
           clt_index <- alnoto_index[t]
           alnoto_clts <- paste0(first_cluster[clt_index], " and ", second_cluster[clt_index])
           alnoto_clt_pair <- c(alnoto_clt_pair, alnoto_clts)
@@ -510,10 +515,10 @@ if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there a
       
       
       # user specify upper bound
-      if(sum(same_arm_frac >= samearmhi) > 0){
+      if (sum(same_arm_frac >= samearmhi) > 0) {
         hi_index <- which(same_arm_frac >= samearmhi)
         hi_pair <- c()
-        for(t in 1:length(hi_index)){
+        for (t in 1:length(hi_index)) {
           clt_index <- hi_index[t]
           hi_cluts <- paste0(first_cluster[clt_index], " and ", second_cluster[clt_index])
           hi_pair <- c(hi_pair, hi_cluts)
@@ -527,10 +532,10 @@ if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there a
       }
       
       # user specified lower bound
-      if(sum(same_arm_frac <= samearmlo) > 0){
+      if (sum(same_arm_frac <= samearmlo) > 0) {
         lo_index <- which(same_arm_frac <= samearmlo)
         lo_pair <- c()
-        for(t in 1:length(lo_index)){
+        for (t in 1:length(lo_index)) {
           clt_index <- lo_index[t]
           lo_cluts <- paste0(first_cluster[clt_index], " and ", second_cluster[clt_index])
           lo_pair <- c(lo_pair, lo_cluts)
@@ -585,7 +590,7 @@ if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there a
 
 
   # indicate a enumeration process or a simulation process with the detailed number of schemes
-    if(sim == 1){
+    if (sim == 1) {
 
     scheme_message <- paste("Simulating", S, "schemes with", R, "unique schemes for", ntrt_cluster, "clusters in the treatment arm out of", ntotal_cluster, "clusters in total")
 
@@ -600,7 +605,7 @@ if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there a
 
       colnames(data_merge)[1] <- "arm"
 
-      if(!is.null(categorical)){
+      if (!is.null(categorical)) {
      # put the categorical variables into factors to prepare for the "CreateTableOne" function
 
         if(is.character(categorical)){
@@ -620,7 +625,7 @@ if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there a
 
     }
 
-      Descriptive_statistics <- CreateTableOne( vars = colnames(data_merge)[c(-1, -2)], strata=c("arm"), data=data_merge, test =  FALSE)
+      Descriptive_statistics <- CreateTableOne(vars = colnames(data_merge)[c(-1, -2)], strata=c("arm"), data=data_merge, test =  FALSE)
        # create the descriptive table to compare the two arms from constrained randomization using BL
 
       invisible(capture.output(DS <- as.data.frame(print(Descriptive_statistics))))
@@ -629,17 +634,17 @@ if (choose(nsub, ntrt) <= size | nosim == TRUE) {       # enumeration if there a
       colnames(DS)[1:2] <- c("arm = 0", "arm = 1")
 
   return(list(allocation = Allocation,
-             assignment_message = assignment_message,
-             scheme_message = scheme_message,
-             data_CR = data_merge,
-             baseline_table = DS, 
-             cluster_coincidence = coin_matrix, 
-             cluster_coin_des = coin_descri, 
-             clusters_always_pair = al_clusters, 
-             clusters_always_not_pair = alno_clusters, 
-             clusters_high_pair = hi_clusters, 
-             clusters_low_pair = lo_clusters, 
-             overall_allocations = summary_constraints, 
-             overall_summary = report_list))
+              assignment_message = assignment_message,
+              scheme_message = scheme_message,
+              data_CR = data_merge,
+              baseline_table = DS, 
+              cluster_coincidence = coin_matrix, 
+              cluster_coin_des = coin_descri, 
+              clusters_always_pair = al_clusters, 
+              clusters_always_not_pair = alno_clusters, 
+              clusters_high_pair = hi_clusters, 
+              clusters_low_pair = lo_clusters, 
+              overall_allocations = summary_constraints, 
+              overall_summary = report_list))
 
 }

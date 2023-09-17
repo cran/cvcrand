@@ -3,6 +3,7 @@
 \docType{package}
 \name{cvcrand}
 \alias{cvcrand}
+\alias{cvcrand-package}
 \title{cvcrand: a package for efficient design and analysis of cluster randomized trials}
 \description{
 cvcrand: A Package for Covariate-constrained Randomization and the Clustered Permutation Test for
@@ -15,3 +16,15 @@ The cvrcov function performs covariate-constrained randomization on cluster rand
 The cptest function performs permutation test on the outcome of cluster randomized trials (CRTs)
 }
 
+\author{
+\strong{Maintainer}: Hengshi Yu \email{hengshi@umich.edu}
+
+Authors:
+\itemize{
+  \item Fan Li \email{fan.f.li@yale.edu}
+  \item John A. Gallis \email{john.gallis@duke.edu}
+  \item Elizabeth L. Turner \email{liz.turner@duke.edu}
+}
+
+}
+\keyword{internal}

@@ -47,8 +47,8 @@
 
 
 cptest <- function(outcome, clustername, z = NULL, cspacedatname, outcometype, categorical = NULL){
-    x <- z
-  if(!is.null(z)){
+  x <- z
+  if (!is.null(z)) {
        if (is.null(categorical)) { # if there are no categorical variables specified
 
    if (sum(apply(x, 2, function(x) length(unique(x[!is.na(x)]))) <= 1) >= 1) {
@@ -151,19 +151,19 @@ cptest <- function(outcome, clustername, z = NULL, cspacedatname, outcometype, c
   # all the schemes without the chosen indicator variable
 
 
-  for(i in 1:dim(dpmt)[1]){
+  for (i in 1:dim(dpmt)[1]) {
 
-  	        for(j in 1:dim(dpmt)[2]){
+  	        for (j in 1:dim(dpmt)[2]) {
 
                         if (dpmt[i, j]==0) {
 
            	                            dpmt[i, j] <- -1
 
-                                            }
+                        }
 
-  	                                }
+  	        }
 
-                          }
+  }
     # transform 0 in the constrained space into -1
 
 
@@ -177,9 +177,9 @@ cptest <- function(outcome, clustername, z = NULL, cspacedatname, outcometype, c
 
 
 
-  if(!is.null(z)){
+  if (!is.null(z)) {
     fm <- as.formula(paste0("outcome~", paste(names(x), collapse = "+")))
-  }else{
+  } else {
     fm <- as.formula("outcome ~ 1")
   }
    
@@ -188,7 +188,7 @@ cptest <- function(outcome, clustername, z = NULL, cspacedatname, outcometype, c
    x$outcome <- outcome
    # merge the outcome and the covariates into one data frame
 
-   if (outcometype == "continuous"){
+   if (outcometype == "continuous") {
 
        ADJMeans <- tapply(lm(formula = fm, data = x)$res, clustername, mean)
        # for continuous outcome, we use linear regression
